@@ -23,6 +23,12 @@ variable "personal_access_token" {
   sensitive   = true
 }
 
+variable "pipeline_folder_path" {
+  type        = string
+  default     = null
+  description = "The relative path to the folder containing pipeline YAML files to use. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
+}
+
 variable "private_endpoints_subnet_resource_id" {
   type        = string
   default     = null

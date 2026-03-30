@@ -26,19 +26,23 @@ locals {
     root_module_folder_relative_path = "."
   }
 
-  pipeline_main_folder = "${path.module}/pipelines/main"
-  pipeline_main_files = { for file in fileset(local.pipeline_main_folder, "**") : file => {
+  effective_pipeline_folder = var.pipeline_folder_path != null ? var.pipeline_folder_path : (
+    contains(["terraform", "bicep"], var.deployment_mode) ? "pipelines/${var.deployment_mode}" : null
+  )
+
+  pipeline_main_folder = local.effective_pipeline_folder != null ? "${path.module}/${local.effective_pipeline_folder}/main" : null
+  pipeline_main_files = local.pipeline_main_folder != null ? { for file in fileset(local.pipeline_main_folder, "**") : file => {
     name    = file
     content = templatefile("${local.pipeline_main_folder}/${file}", local.pipeline_main_replacements)
-  } }
+  } } : {}
 
   main_repository_files = merge(local.files, local.pipeline_main_files)
 
-  pipeline_template_folder = "${path.module}/pipelines/templates"
-  pipeline_template_files = { for file in fileset(local.pipeline_template_folder, "**") : file => {
+  pipeline_template_folder = local.effective_pipeline_folder != null ? "${path.module}/${local.effective_pipeline_folder}/templates" : null
+  pipeline_template_files = local.pipeline_template_folder != null ? { for file in fileset(local.pipeline_template_folder, "**") : file => {
     name    = file
     content = file("${local.pipeline_template_folder}/${file}")
-  } }
+  } } : {}
 }
 
 resource "azuredevops_git_repository_file" "this" {

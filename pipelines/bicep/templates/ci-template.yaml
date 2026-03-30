@@ -1,0 +1,73 @@
+---
+parameters:
+  - name: environments
+    type: object
+    default: []
+  - name: root_module_folder_relative_path
+    default: '.'
+  - name: bicep_cli_version
+    default: 'latest'
+
+stages:
+  - stage: validate
+    displayName: Validate Bicep
+    jobs:
+      - job: validate
+        displayName: Validate Bicep
+        pool:
+          ${{ if eq(parameters.environments[0].agent_pool_type, 'self-hosted') }}:
+            name: ${{ parameters.environments[0].agent_pool_name }}
+          ${{ if eq(parameters.environments[0].agent_pool_type, 'microsoft-hosted') }}:
+            vmImage: ${{ parameters.environments[0].agent_pool_name }}
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Install Bicep CLI'
+            inputs:
+              azureSubscription: ${{ parameters.environments[0].service_connection_name_plan }}
+              scriptType: pscore
+              scriptLocation: inlineScript
+              inlineScript: |
+                az bicep install
+                az bicep version
+          - pwsh: |
+              az bicep build --file "${{ parameters.root_module_folder_relative_path }}/main.bicep"
+            displayName: Bicep Build (Validate)
+
+      - ${{ each environment in parameters.environments }}:
+        - deployment: ${{ environment.name }}_validate
+          variables:
+            - group: ${{ environment.variable_group_name }}
+          dependsOn: validate
+          displayName: Validate Bicep Deployment for ${{ environment.display_name }}
+          pool:
+            ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
+              name: ${{ environment.agent_pool_name }}
+            ${{ if eq(environment.agent_pool_type, 'microsoft-hosted') }}:
+              vmImage: ${{ environment.agent_pool_name }}
+          environment: ${{ environment.environment_name }}
+          timeoutInMinutes: 0
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    displayName: Checkout Bicep Module
+                  - task: AzureCLI@2
+                    displayName: 'Validate Bicep Deployment'
+                    inputs:
+                      azureSubscription: ${{ environment.service_connection_name_plan }}
+                      scriptType: pscore
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        $varFilePath = "${{ coalesce(variables['VAR_FILE_PATH'], '') }}"
+                        $arguments = @(
+                          "deployment", "group", "validate",
+                          "--resource-group", "$(RESOURCE_GROUP_NAME)",
+                          "--template-file", "${{ parameters.root_module_folder_relative_path }}/main.bicep"
+                        )
+                        if($varFilePath -ne "") {
+                          $arguments += "--parameters"
+                          $arguments += "@$varFilePath"
+                        }
+                        Write-Host "Running: az $arguments"
+                        az @arguments

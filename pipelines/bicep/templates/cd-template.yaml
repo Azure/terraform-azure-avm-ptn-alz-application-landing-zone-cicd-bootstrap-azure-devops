@@ -1,0 +1,97 @@
+---
+parameters:
+  - name: bicep_action
+    default: 'deploy'
+  - name: environment
+    default: All
+  - name: environments
+    type: object
+    default: []
+  - name: root_module_folder_relative_path
+    default: '.'
+  - name: bicep_cli_version
+    default: 'latest'
+
+stages:
+- ${{ each environment in parameters.environments }}:
+  - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
+    - stage: ${{ environment.name }}_what_if
+      displayName: ${{ environment.display_name }} What-If
+      variables:
+        - group: ${{ environment.variable_group_name }}
+      jobs:
+        - deployment: what_if
+          displayName: What-If with Bicep
+          pool:
+            ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
+              name: ${{ environment.agent_pool_name }}
+            ${{ if eq(environment.agent_pool_type, 'microsoft-hosted') }}:
+              vmImage: ${{ environment.agent_pool_name }}
+          environment: ${{ environment.environment_name }}
+          timeoutInMinutes: 0
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    displayName: Checkout Bicep Module
+                  - task: AzureCLI@2
+                    displayName: 'Bicep What-If'
+                    inputs:
+                      azureSubscription: ${{ environment.service_connection_name_plan }}
+                      scriptType: pscore
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        $varFilePath = "${{ coalesce(variables['VAR_FILE_PATH'], '') }}"
+                        $arguments = @(
+                          "deployment", "group", "what-if",
+                          "--resource-group", "$(RESOURCE_GROUP_NAME)",
+                          "--template-file", "${{ parameters.root_module_folder_relative_path }}/main.bicep"
+                        )
+                        if($varFilePath -ne "") {
+                          $arguments += "--parameters"
+                          $arguments += "@$varFilePath"
+                        }
+                        Write-Host "Running: az $arguments"
+                        az @arguments
+
+  - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
+    - stage: ${{ environment.name }}_deploy
+      displayName: ${{ environment.display_name }} Deploy
+      variables:
+        - group: ${{ environment.variable_group_name }}
+      jobs:
+        - deployment: deploy
+          displayName: Deploy with Bicep
+          pool:
+            ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
+              name: ${{ environment.agent_pool_name }}
+            ${{ if eq(environment.agent_pool_type, 'microsoft-hosted') }}:
+              vmImage: ${{ environment.agent_pool_name }}
+          environment: ${{ environment.environment_name }}
+          timeoutInMinutes: 0
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    displayName: Checkout Bicep Module
+                  - task: AzureCLI@2
+                    displayName: 'Bicep Deploy'
+                    inputs:
+                      azureSubscription: ${{ environment.service_connection_name_apply }}
+                      scriptType: pscore
+                      scriptLocation: inlineScript
+                      inlineScript: |
+                        $varFilePath = "${{ coalesce(variables['VAR_FILE_PATH'], '') }}"
+                        $arguments = @(
+                          "deployment", "group", "create",
+                          "--resource-group", "$(RESOURCE_GROUP_NAME)",
+                          "--template-file", "${{ parameters.root_module_folder_relative_path }}/main.bicep"
+                        )
+                        if($varFilePath -ne "") {
+                          $arguments += "--parameters"
+                          $arguments += "@$varFilePath"
+                        }
+                        Write-Host "Running: az $arguments"
+                        az @arguments
