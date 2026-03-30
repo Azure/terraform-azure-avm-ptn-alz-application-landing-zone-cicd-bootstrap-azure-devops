@@ -25,13 +25,13 @@ provider "azurerm" {
   features {}
 }
 
-# This is the module call
+# BYO agent pool with Terraform pipelines (no self-hosted infra created)
 module "test" {
   source = "../../"
 
-  # source             = "Azure/avm-ptn-alz-application-landing-zone-cicd-bootstrap-azure-devops/azurerm"
   location            = var.location
   organization_name   = var.organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
+  agent_pool_name     = "my-existing-agent-pool"
 }

@@ -25,13 +25,15 @@ provider "azurerm" {
   features {}
 }
 
-# This is the module call
+# ACA with Bicep pipelines
 module "test" {
   source = "../../"
 
-  # source             = "Azure/avm-ptn-alz-application-landing-zone-cicd-bootstrap-azure-devops/azurerm"
-  location            = var.location
-  organization_name   = var.organization_name
-  enable_telemetry    = var.enable_telemetry
-  example_module_path = "examples/terraform-example-module"
+  location               = var.location
+  organization_name      = var.organization_name
+  enable_telemetry       = var.enable_telemetry
+  deployment_mode        = "bicep"
+  example_module_path    = "examples/bicep-example-module"
+  self_hosted_agent_type = "azure_container_app"
+  use_self_hosted_agents = true
 }
