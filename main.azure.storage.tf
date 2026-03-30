@@ -27,7 +27,7 @@ module "storage_account" {
   public_network_access_enabled = !local.use_private_networking
   network_rules                 = local.use_private_networking ? {} : null
 
-  containers = { for env_key, env_value in var.environments : env_key => {
+  containers = { for env_key, env_value in local.environments : env_key => {
     name          = env_key
     public_access = "None"
     role_assignments = {

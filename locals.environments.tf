@@ -29,6 +29,7 @@ locals {
       environment        = env_key
       type               = split_key
       required_templates = split_key == local.environment_split_type.plan ? ["ci-template.yaml", "cd-template.yaml"] : ["cd-template.yaml"]
+      has_approval       = env_value.has_approval
       user_assigned_managed_identity_name = templatestring(env_value.user_assigned_managed_identity_name_template, {
         workload    = local.name_replacements.workload
         environment = env_key
