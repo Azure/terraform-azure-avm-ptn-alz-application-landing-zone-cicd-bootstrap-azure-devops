@@ -7,22 +7,22 @@ variable "environments" {
     scope                                        = optional(string, "resource_group")
     subscription_id                              = optional(string)
     resource_id                                  = optional(string)
+    resource_group_name                         = optional(string)
     resource_group_create                        = optional(bool, true)
-    resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
     identities = optional(object({
       read = optional(object({
         enabled        = optional(bool, true)
+        name           = optional(string)
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
         })), { default = { role_definition_id_or_name = "Reader" } })
-        name_template  = optional(string, "uami-$${workload}-$${environment}-read-$${location}-$${sequence}")
       }), {})
       write = optional(object({
         enabled        = optional(bool, true)
+        name           = optional(string)
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
         })), { default = { role_definition_id_or_name = "Contributor" } })
-        name_template  = optional(string, "uami-$${workload}-$${environment}-write-$${location}-$${sequence}")
       }), {})
     }), {})
   }))
@@ -35,11 +35,12 @@ A map of environments to create. Each environment has the following properties:
 - `scope` - (Optional) The deployment scope: 'resource_group', 'subscription', or 'management_group'. Defaults to 'resource_group'.
 - `subscription_id` - (Optional) The subscription ID for the environment. Defaults to the current subscription.
 - `resource_id` - (Optional) The resource ID of the target scope.
+- `resource_group_name` - (Optional) Explicit resource group name. When null, generated from `resource_group_env_name` template in `resource_name_templates`.
 - `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource_group' and resource_id is not set.
 - `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
   - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
+  - `name` - (Optional) Explicit identity name. When null, generated from `identity_read_name` or `identity_write_name` template in `resource_name_templates`.
   - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
-  - `name_template` - (Optional) The naming template for the managed identity.
 DESCRIPTION
   default = {
     dev = {

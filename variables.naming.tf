@@ -73,5 +73,8 @@ variable "resource_name_templates" {
     group_name                            = "group-$${workload}-$${environment}-approvers"
     service_connection_name                = "service-connection-$${workload}-$${environment}"
     federated_credential_name             = "$${workload}-$${environment}"
+    resource_group_env_name               = "rg-$${workload}-env-$${environment}-$${location}-$${sequence}"
+    identity_read_name                    = "uami-$${workload}-$${environment}-read-$${location}-$${sequence}"
+    identity_write_name                   = "uami-$${workload}-$${environment}-write-$${location}-$${sequence}"
   }
 }

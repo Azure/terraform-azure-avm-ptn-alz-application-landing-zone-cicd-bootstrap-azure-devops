@@ -10,12 +10,12 @@ locals {
     resource_id           = value.resource_id
     create_resource_group = value.scope == "resource_group" && value.resource_id == null && value.resource_group_create
     identities            = value.identities
-    resource_group_name = templatestring(value.resource_group_name_template, {
+    resource_group_name = coalesce(value.resource_group_name, templatestring(local.resource_names.resource_group_env_name, {
       workload    = local.name_replacements.workload
       environment = key
       location    = local.name_replacements.location
       sequence    = local.name_replacements.sequence
-    })
+    }))
   } }
 
   environment_split = { for identity in flatten([for env_key, env_value in local.environments : [
@@ -28,12 +28,15 @@ locals {
       role_assignments            = identity_value.role_assignments
       has_approval               = env_value.has_approval
       required_templates         = identity_key == "read" ? ["ci-template.yaml", "cd-template.yaml"] : ["cd-template.yaml"]
-      user_assigned_managed_identity_name = templatestring(identity_value.name_template, {
-        workload    = local.name_replacements.workload
-        environment = env_key
-        location    = local.name_replacements.location
-        sequence    = local.name_replacements.sequence
-      })
+      user_assigned_managed_identity_name = coalesce(
+        identity_value.name,
+        templatestring(local.resource_names["identity_${identity_key}_name"], {
+          workload    = local.name_replacements.workload
+          environment = env_key
+          location    = local.name_replacements.location
+          sequence    = local.name_replacements.sequence
+        })
+      )
       service_connection_name   = "${local.resource_names.service_connection_name}-${env_key}-${identity_key}"
       federated_credential_name = "${local.resource_names.federated_credential_name}-${env_key}-${identity_key}"
     }
