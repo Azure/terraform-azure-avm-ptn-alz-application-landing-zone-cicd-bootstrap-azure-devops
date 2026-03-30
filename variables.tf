@@ -64,6 +64,29 @@ variable "agent_use_availability_zones" {
   description = "Use availability zones for the agent pool if using container instances. This is off by default due to faults in various regions at time of authoring."
 }
 
+variable "bicep_deployments" {
+  type = list(object({
+    name                = string
+    template_file       = string
+    parameters_file     = optional(string)
+    scope               = optional(string, "group")
+    resource_group      = optional(string)
+    location            = optional(string)
+    management_group_id = optional(string)
+  }))
+  default     = null
+  description = <<DESCRIPTION
+A list of Bicep deployment stack configurations. Each deployment specifies a template file, optional parameters file, and scope.
+- `name` - (Required) The name of the deployment stack.
+- `template_file` - (Required) The relative path to the Bicep template file.
+- `parameters_file` - (Optional) The relative path to the parameters file.
+- `scope` - (Optional) The deployment scope: 'group' (resource group), 'sub' (subscription), or 'mg' (management group). Defaults to 'group'.
+- `resource_group` - (Optional) The resource group name. Required when scope is 'group'.
+- `location` - (Optional) The deployment location. Required when scope is 'sub' or 'mg'.
+- `management_group_id` - (Optional) The management group ID. Required when scope is 'mg'.
+DESCRIPTION
+}
+
 variable "agents_subnet_resource_id" {
   type        = string
   default     = null

@@ -21,7 +21,7 @@ stages:
         - group: ${{ environment.variable_group_name }}
       jobs:
         - deployment: what_if
-          displayName: What-If with Bicep
+          displayName: What-If with Deployment Stacks
           pool:
             ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
               name: ${{ environment.agent_pool_name }}
@@ -36,24 +36,42 @@ stages:
                   - checkout: self
                     displayName: Checkout Bicep Module
                   - task: AzureCLI@2
-                    displayName: 'Bicep What-If'
+                    displayName: 'Deployment Stacks What-If'
                     inputs:
                       azureSubscription: ${{ environment.service_connection_name_plan }}
                       scriptType: pscore
                       scriptLocation: inlineScript
                       inlineScript: |
-                        $varFilePath = "${{ coalesce(variables['VAR_FILE_PATH'], '') }}"
-                        $arguments = @(
-                          "deployment", "group", "what-if",
-                          "--resource-group", "$(RESOURCE_GROUP_NAME)",
-                          "--template-file", "${{ parameters.root_module_folder_relative_path }}/main.bicep"
-                        )
-                        if($varFilePath -ne "") {
-                          $arguments += "--parameters"
-                          $arguments += "@$varFilePath"
+                        $deploymentsJson = $env:BICEP_DEPLOYMENTS
+                        if([string]::IsNullOrEmpty($deploymentsJson)) {
+                          Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
+                          return
                         }
-                        Write-Host "Running: az $arguments"
-                        az @arguments
+                        $deployments = ConvertFrom-Json $deploymentsJson
+                        foreach($deployment in $deployments) {
+                          Write-Host "--- What-If for deployment stack: $($deployment.name) ---"
+                          $scope = if($deployment.scope) { $deployment.scope } else { "group" }
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
+                          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+                          switch($scope) {
+                            "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
+                            "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
+                            "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+                          }
+
+                          $arguments += @("--template-file", $templateFile)
+                          if($deployment.parameters_file) {
+                            $paramsFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.parameters_file)"
+                            $arguments += @("--parameters", "@$paramsFile")
+                          }
+                          $arguments += "--what-if"
+                          Write-Host "Running: az $arguments"
+                          az @arguments
+                          if($LASTEXITCODE -ne 0) { throw "What-If failed for deployment stack: $($deployment.name)" }
+                        }
+                    env:
+                      BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)
 
   - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
     - stage: ${{ environment.name }}_deploy
@@ -62,7 +80,7 @@ stages:
         - group: ${{ environment.variable_group_name }}
       jobs:
         - deployment: deploy
-          displayName: Deploy with Bicep
+          displayName: Deploy with Deployment Stacks
           pool:
             ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
               name: ${{ environment.agent_pool_name }}
@@ -77,21 +95,38 @@ stages:
                   - checkout: self
                     displayName: Checkout Bicep Module
                   - task: AzureCLI@2
-                    displayName: 'Bicep Deploy'
+                    displayName: 'Deployment Stacks Deploy'
                     inputs:
                       azureSubscription: ${{ environment.service_connection_name_apply }}
                       scriptType: pscore
                       scriptLocation: inlineScript
                       inlineScript: |
-                        $varFilePath = "${{ coalesce(variables['VAR_FILE_PATH'], '') }}"
-                        $arguments = @(
-                          "deployment", "group", "create",
-                          "--resource-group", "$(RESOURCE_GROUP_NAME)",
-                          "--template-file", "${{ parameters.root_module_folder_relative_path }}/main.bicep"
-                        )
-                        if($varFilePath -ne "") {
-                          $arguments += "--parameters"
-                          $arguments += "@$varFilePath"
+                        $deploymentsJson = $env:BICEP_DEPLOYMENTS
+                        if([string]::IsNullOrEmpty($deploymentsJson)) {
+                          Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
+                          return
                         }
-                        Write-Host "Running: az $arguments"
-                        az @arguments
+                        $deployments = ConvertFrom-Json $deploymentsJson
+                        foreach($deployment in $deployments) {
+                          Write-Host "--- Deploying stack: $($deployment.name) ---"
+                          $scope = if($deployment.scope) { $deployment.scope } else { "group" }
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
+                          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+                          switch($scope) {
+                            "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
+                            "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
+                            "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+                          }
+
+                          $arguments += @("--template-file", $templateFile)
+                          if($deployment.parameters_file) {
+                            $paramsFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.parameters_file)"
+                            $arguments += @("--parameters", "@$paramsFile")
+                          }
+                          Write-Host "Running: az $arguments"
+                          az @arguments
+                          if($LASTEXITCODE -ne 0) { throw "Deploy failed for deployment stack: $($deployment.name)" }
+                        }
+                    env:
+                      BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)

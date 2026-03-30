@@ -27,3 +27,16 @@ resource "azuredevops_variable_group" "this" {
     value = each.key
   }
 }
+
+resource "azuredevops_variable_group" "bicep" {
+  for_each     = var.deployment_mode == "bicep" ? var.environments : {}
+  project_id   = local.azure_devops_project_id
+  name         = each.key
+  description  = "Variable Group for ${each.value.display_name}"
+  allow_access = true
+
+  variable {
+    name  = "BICEP_DEPLOYMENTS"
+    value = var.bicep_deployments != null ? jsonencode(var.bicep_deployments) : "[]"
+  }
+}
