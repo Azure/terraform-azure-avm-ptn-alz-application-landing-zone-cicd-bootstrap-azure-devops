@@ -9,10 +9,18 @@ variable "environments" {
     resource_id                                  = optional(string)
     resource_group_create                        = optional(bool, true)
     resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
-    user_assigned_managed_identity_name_template = optional(string, "uami-$${workload}-$${environment}-$${type}-$${location}-$${sequence}")
-    identities = optional(map(object({
-      role_definition_id_or_name = string
-    })))
+    identities = optional(object({
+      read = optional(object({
+        enabled                    = optional(bool, true)
+        role_definition_id_or_name = optional(string, "Reader")
+        name_template              = optional(string, "uami-$${workload}-$${environment}-read-$${location}-$${sequence}")
+      }), {})
+      write = optional(object({
+        enabled                    = optional(bool, true)
+        role_definition_id_or_name = optional(string, "Contributor")
+        name_template              = optional(string, "uami-$${workload}-$${environment}-write-$${location}-$${sequence}")
+      }), {})
+    }), {})
   }))
   description = <<DESCRIPTION
 A map of environments to create. Each environment has the following properties:
@@ -24,7 +32,10 @@ A map of environments to create. Each environment has the following properties:
 - `subscription_id` - (Optional) The subscription ID for the environment. Defaults to the current subscription.
 - `resource_id` - (Optional) The resource ID of the target scope.
 - `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource_group' and resource_id is not set.
-- `identities` - (Optional) A map of identities to create (1 or 2). Keys are identity names (e.g. 'read', 'write'), values specify the role. When null, defaults based on deployment_mode: terraform/bicep get read (Reader) + write (Contributor); other gets write (Contributor) only.
+- `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
+  - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
+  - `role_definition_id_or_name` - (Optional) The role for this identity. Read defaults to 'Reader', write defaults to 'Contributor'.
+  - `name_template` - (Optional) The naming template for the managed identity.
 DESCRIPTION
   default = {
     dev = {
@@ -48,8 +59,8 @@ DESCRIPTION
     error_message = "Each environment scope must be 'resource_group', 'subscription', or 'management_group'."
   }
   validation {
-    condition     = alltrue([for k, v in var.environments : v.identities == null || (length(v.identities) >= 1 && length(v.identities) <= 2)])
-    error_message = "Each environment must have 1 or 2 identities when specified."
+    condition     = alltrue([for k, v in var.environments : v.identities.read.enabled || v.identities.write.enabled])
+    error_message = "Each environment must have at least one identity enabled (read or write)."
   }
 }
 
