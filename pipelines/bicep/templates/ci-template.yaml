@@ -3,6 +3,9 @@ parameters:
   - name: environments
     type: object
     default: []
+  - name: deployments
+    type: object
+    default: []
   - name: root_module_folder_relative_path
     default: '.'
   - name: bicep_cli_version
@@ -13,7 +16,7 @@ stages:
     displayName: Validate Bicep
     jobs:
       - job: validate
-        displayName: Validate Bicep
+        displayName: Validate Bicep Syntax
         pool:
           ${{ if eq(parameters.environments[0].agent_pool_type, 'self-hosted') }}:
             name: ${{ parameters.environments[0].agent_pool_name }}
@@ -29,32 +32,17 @@ stages:
               inlineScript: |
                 az bicep install
                 az bicep version
-          - task: AzureCLI@2
-            displayName: 'Validate Bicep Files'
-            inputs:
-              azureSubscription: ${{ parameters.environments[0].service_connection_name_plan }}
-              scriptType: pscore
-              scriptLocation: inlineScript
-              inlineScript: |
-                $deploymentsJson = $env:BICEP_DEPLOYMENTS
-                if([string]::IsNullOrEmpty($deploymentsJson)) {
-                  az bicep build --file "${{ parameters.root_module_folder_relative_path }}/main.bicep"
-                } else {
-                  $deployments = ConvertFrom-Json $deploymentsJson
-                  foreach($deployment in $deployments) {
-                    Write-Host "Validating: $($deployment.template_file)"
-                    az bicep build --file "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
-                  }
-                }
-            env:
-              BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)
+          - ${{ each deployment in parameters.deployments }}:
+            - pwsh: |
+                az bicep build --file "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
+              displayName: 'Bicep Build - ${{ deployment.name }}'
 
       - ${{ each environment in parameters.environments }}:
         - deployment: ${{ environment.name }}_validate
           variables:
             - group: ${{ environment.variable_group_name }}
           dependsOn: validate
-          displayName: Validate Bicep Deployment for ${{ environment.display_name }}
+          displayName: Validate Deployment Stacks for ${{ environment.display_name }}
           pool:
             ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
               name: ${{ environment.agent_pool_name }}
@@ -68,40 +56,30 @@ stages:
                 steps:
                   - checkout: self
                     displayName: Checkout Bicep Module
-                  - task: AzureCLI@2
-                    displayName: 'Validate Bicep Deployments'
-                    inputs:
-                      azureSubscription: ${{ environment.service_connection_name_plan }}
-                      scriptType: pscore
-                      scriptLocation: inlineScript
-                      inlineScript: |
-                        $deploymentsJson = $env:BICEP_DEPLOYMENTS
-                        if([string]::IsNullOrEmpty($deploymentsJson)) {
-                          Write-Host "No BICEP_DEPLOYMENTS variable set, skipping validation"
-                          return
-                        }
-                        $deployments = ConvertFrom-Json $deploymentsJson
-                        foreach($deployment in $deployments) {
-                          Write-Host "--- Validating deployment: $($deployment.name) ---"
-                          $scope = if($deployment.scope) { $deployment.scope } else { "resourceGroup" }
-                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
+                  - ${{ each deployment in parameters.deployments }}:
+                    - task: AzureCLI@2
+                      displayName: 'What-If - ${{ deployment.name }}'
+                      inputs:
+                        azureSubscription: ${{ environment.service_connection_name_plan }}
+                        scriptType: pscore
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          $scope = "${{ coalesce(deployment.scope, 'group') }}"
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
                           $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
 
                           switch($scope) {
-                            "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
-                            "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
-                            "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+                            "group" { $arguments += @("--resource-group", "${{ deployment.resource_group }}", "--name", "${{ deployment.name }}") }
+                            "sub"   { $arguments += @("--location", "${{ deployment.location }}", "--name", "${{ deployment.name }}") }
+                            "mg"    { $arguments += @("--location", "${{ deployment.location }}", "--management-group-id", "${{ deployment.management_group_id }}", "--name", "${{ deployment.name }}") }
                           }
 
                           $arguments += @("--template-file", $templateFile)
-                          if($deployment.parameters_file) {
-                            $paramsFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.parameters_file)"
-                            $arguments += @("--parameters", "@$paramsFile")
+                          $paramsFile = "${{ deployment.parameters_file }}"
+                          if($paramsFile -ne "") {
+                            $arguments += @("--parameters", "@${{ parameters.root_module_folder_relative_path }}/$paramsFile")
                           }
                           $arguments += "--what-if"
                           Write-Host "Running: az $arguments"
                           az @arguments
-                          if($LASTEXITCODE -ne 0) { throw "Validation failed for deployment: $($deployment.name)" }
-                        }
-                    env:
-                      BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)
+                          if($LASTEXITCODE -ne 0) { throw "What-If failed for: ${{ deployment.name }}" }

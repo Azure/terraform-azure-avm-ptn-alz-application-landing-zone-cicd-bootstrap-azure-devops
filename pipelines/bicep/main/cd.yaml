@@ -40,6 +40,16 @@ extends:
     root_module_folder_relative_path: ${root_module_folder_relative_path}
     environment: $${{ parameters.environment }}
     bicep_cli_version: $${{ coalesce(parameters.bicep_cli_version, 'latest') }}
+    deployments:
+%{ for deployment in deployments ~}
+      - name: ${deployment.name}
+        template_file: ${deployment.template_file}
+        parameters_file: ${try(deployment.parameters_file, "")}
+        scope: ${try(deployment.scope, "group")}
+        resource_group: ${try(deployment.resource_group, "")}
+        location: ${try(deployment.location, "")}
+        management_group_id: ${try(deployment.management_group_id, "")}
+%{ endfor ~}
     environments:
 %{ for environment in environments ~}
       - name: ${environment.name}

@@ -24,6 +24,7 @@ locals {
     cd_template_path                 = local.effective_cd_template_path
     ci_template_path                 = local.effective_ci_template_path
     root_module_folder_relative_path = "."
+    deployments                      = var.bicep_deployments != null ? var.bicep_deployments : []
   }
 
   effective_pipeline_folder = var.pipeline_folder_path != null ? var.pipeline_folder_path : (

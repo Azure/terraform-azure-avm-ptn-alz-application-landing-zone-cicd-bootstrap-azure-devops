@@ -7,6 +7,9 @@ parameters:
   - name: environments
     type: object
     default: []
+  - name: deployments
+    type: object
+    default: []
   - name: root_module_folder_relative_path
     default: '.'
   - name: bicep_cli_version
@@ -35,43 +38,33 @@ stages:
                 steps:
                   - checkout: self
                     displayName: Checkout Bicep Module
-                  - task: AzureCLI@2
-                    displayName: 'Deployment Stacks What-If'
-                    inputs:
-                      azureSubscription: ${{ environment.service_connection_name_plan }}
-                      scriptType: pscore
-                      scriptLocation: inlineScript
-                      inlineScript: |
-                        $deploymentsJson = $env:BICEP_DEPLOYMENTS
-                        if([string]::IsNullOrEmpty($deploymentsJson)) {
-                          Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
-                          return
-                        }
-                        $deployments = ConvertFrom-Json $deploymentsJson
-                        foreach($deployment in $deployments) {
-                          Write-Host "--- What-If for deployment stack: $($deployment.name) ---"
-                          $scope = if($deployment.scope) { $deployment.scope } else { "group" }
-                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
+                  - ${{ each deployment in parameters.deployments }}:
+                    - task: AzureCLI@2
+                      displayName: 'What-If - ${{ deployment.name }}'
+                      inputs:
+                        azureSubscription: ${{ environment.service_connection_name_plan }}
+                        scriptType: pscore
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          $scope = "${{ coalesce(deployment.scope, 'group') }}"
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
                           $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
 
                           switch($scope) {
-                            "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
-                            "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
-                            "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+                            "group" { $arguments += @("--resource-group", "${{ deployment.resource_group }}", "--name", "${{ deployment.name }}") }
+                            "sub"   { $arguments += @("--location", "${{ deployment.location }}", "--name", "${{ deployment.name }}") }
+                            "mg"    { $arguments += @("--location", "${{ deployment.location }}", "--management-group-id", "${{ deployment.management_group_id }}", "--name", "${{ deployment.name }}") }
                           }
 
                           $arguments += @("--template-file", $templateFile)
-                          if($deployment.parameters_file) {
-                            $paramsFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.parameters_file)"
-                            $arguments += @("--parameters", "@$paramsFile")
+                          $paramsFile = "${{ deployment.parameters_file }}"
+                          if($paramsFile -ne "") {
+                            $arguments += @("--parameters", "@${{ parameters.root_module_folder_relative_path }}/$paramsFile")
                           }
                           $arguments += "--what-if"
                           Write-Host "Running: az $arguments"
                           az @arguments
-                          if($LASTEXITCODE -ne 0) { throw "What-If failed for deployment stack: $($deployment.name)" }
-                        }
-                    env:
-                      BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)
+                          if($LASTEXITCODE -ne 0) { throw "What-If failed for: ${{ deployment.name }}" }
 
   - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
     - stage: ${{ environment.name }}_deploy
@@ -94,39 +87,29 @@ stages:
                 steps:
                   - checkout: self
                     displayName: Checkout Bicep Module
-                  - task: AzureCLI@2
-                    displayName: 'Deployment Stacks Deploy'
-                    inputs:
-                      azureSubscription: ${{ environment.service_connection_name_apply }}
-                      scriptType: pscore
-                      scriptLocation: inlineScript
-                      inlineScript: |
-                        $deploymentsJson = $env:BICEP_DEPLOYMENTS
-                        if([string]::IsNullOrEmpty($deploymentsJson)) {
-                          Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
-                          return
-                        }
-                        $deployments = ConvertFrom-Json $deploymentsJson
-                        foreach($deployment in $deployments) {
-                          Write-Host "--- Deploying stack: $($deployment.name) ---"
-                          $scope = if($deployment.scope) { $deployment.scope } else { "group" }
-                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.template_file)"
+                  - ${{ each deployment in parameters.deployments }}:
+                    - task: AzureCLI@2
+                      displayName: 'Deploy - ${{ deployment.name }}'
+                      inputs:
+                        azureSubscription: ${{ environment.service_connection_name_apply }}
+                        scriptType: pscore
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          $scope = "${{ coalesce(deployment.scope, 'group') }}"
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
                           $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
 
                           switch($scope) {
-                            "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
-                            "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
-                            "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+                            "group" { $arguments += @("--resource-group", "${{ deployment.resource_group }}", "--name", "${{ deployment.name }}") }
+                            "sub"   { $arguments += @("--location", "${{ deployment.location }}", "--name", "${{ deployment.name }}") }
+                            "mg"    { $arguments += @("--location", "${{ deployment.location }}", "--management-group-id", "${{ deployment.management_group_id }}", "--name", "${{ deployment.name }}") }
                           }
 
                           $arguments += @("--template-file", $templateFile)
-                          if($deployment.parameters_file) {
-                            $paramsFile = "${{ parameters.root_module_folder_relative_path }}/$($deployment.parameters_file)"
-                            $arguments += @("--parameters", "@$paramsFile")
+                          $paramsFile = "${{ deployment.parameters_file }}"
+                          if($paramsFile -ne "") {
+                            $arguments += @("--parameters", "@${{ parameters.root_module_folder_relative_path }}/$paramsFile")
                           }
                           Write-Host "Running: az $arguments"
                           az @arguments
-                          if($LASTEXITCODE -ne 0) { throw "Deploy failed for deployment stack: $($deployment.name)" }
-                        }
-                    env:
-                      BICEP_DEPLOYMENTS: $(BICEP_DEPLOYMENTS)
+                          if($LASTEXITCODE -ne 0) { throw "Deploy failed for: ${{ deployment.name }}" }
