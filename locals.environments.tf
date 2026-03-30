@@ -25,7 +25,7 @@ locals {
       composite_key              = "${env_key}-${identity_key}"
       environment                = env_key
       type                       = identity_key
-      role_definition_id_or_name = identity_value.role_definition_id_or_name
+      role_assignments            = identity_value.role_assignments
       has_approval               = env_value.has_approval
       required_templates         = identity_key == "read" ? ["ci-template.yaml", "cd-template.yaml"] : ["cd-template.yaml"]
       user_assigned_managed_identity_name = templatestring(identity_value.name_template, {

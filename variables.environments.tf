@@ -11,14 +11,18 @@ variable "environments" {
     resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
     identities = optional(object({
       read = optional(object({
-        enabled                    = optional(bool, true)
-        role_definition_id_or_name = optional(string, "Reader")
-        name_template              = optional(string, "uami-$${workload}-$${environment}-read-$${location}-$${sequence}")
+        enabled        = optional(bool, true)
+        role_assignments = optional(map(object({
+          role_definition_id_or_name = string
+        })), { default = { role_definition_id_or_name = "Reader" } })
+        name_template  = optional(string, "uami-$${workload}-$${environment}-read-$${location}-$${sequence}")
       }), {})
       write = optional(object({
-        enabled                    = optional(bool, true)
-        role_definition_id_or_name = optional(string, "Contributor")
-        name_template              = optional(string, "uami-$${workload}-$${environment}-write-$${location}-$${sequence}")
+        enabled        = optional(bool, true)
+        role_assignments = optional(map(object({
+          role_definition_id_or_name = string
+        })), { default = { role_definition_id_or_name = "Contributor" } })
+        name_template  = optional(string, "uami-$${workload}-$${environment}-write-$${location}-$${sequence}")
       }), {})
     }), {})
   }))
@@ -34,7 +38,7 @@ A map of environments to create. Each environment has the following properties:
 - `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource_group' and resource_id is not set.
 - `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
   - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
-  - `role_definition_id_or_name` - (Optional) The role for this identity. Read defaults to 'Reader', write defaults to 'Contributor'.
+  - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
   - `name_template` - (Optional) The naming template for the managed identity.
 DESCRIPTION
   default = {
