@@ -29,6 +29,12 @@ variable "address_space" {
   default     = "10.0.0.0/24"
 }
 
+variable "agent_pool_name" {
+  type        = string
+  default     = null
+  description = "The name of a pre-existing Azure DevOps agent pool to use (BYO mode). When set, the module will not create an agent pool or any Azure compute infrastructure for agents. The provided pool name will be used in pipeline YAML files."
+}
+
 variable "agent_use_availability_zones" {
   type        = bool
   default     = false

@@ -13,8 +13,11 @@ locals {
 }
 
 locals {
-  default_audience_name = "api://AzureADTokenExchange"
-  organization_name_url = "${var.organization_name_prefix}/${var.organization_name}"
+  default_audience_name          = "api://AzureADTokenExchange"
+  organization_name_url          = "${var.organization_name_prefix}/${var.organization_name}"
+  create_agent_infrastructure    = var.use_self_hosted_agents && var.agent_pool_name == null
+  is_self_hosted                 = var.use_self_hosted_agents || var.agent_pool_name != null
+  effective_agent_pool_name      = var.agent_pool_name != null ? var.agent_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
 }
 
 locals {

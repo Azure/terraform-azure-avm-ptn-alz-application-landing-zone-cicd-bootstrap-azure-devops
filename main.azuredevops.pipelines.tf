@@ -61,7 +61,7 @@ resource "azuredevops_pipeline_authorization" "environment" {
 }
 
 resource "azuredevops_pipeline_authorization" "agent_pool" {
-  for_each    = var.use_self_hosted_agents ? local.pipelines : {}
+  for_each    = local.create_agent_infrastructure ? local.pipelines : {}
   project_id  = local.azure_devops_project_id
   resource_id = azuredevops_agent_queue.this[0].id
   type        = "queue"

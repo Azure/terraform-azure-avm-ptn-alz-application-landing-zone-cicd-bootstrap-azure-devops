@@ -10,7 +10,7 @@ locals {
         name = local.resource_names.resource_group_identity_name
       }
     },
-    var.use_self_hosted_agents ? {
+    local.create_agent_infrastructure ? {
       agents = {
         name = local.resource_names.resource_group_agents_name
       }

@@ -2,7 +2,7 @@ module "private_dns_zone_storage_account" {
   source  = "Azure/avm-res-network-privatednszone/azurerm"
   version = "0.5.0"
 
-  count = var.deployment_mode == "terraform" && var.use_self_hosted_agents && !var.alz_platform_landing_zone_mode_enabled ? 1 : 0
+  count = var.deployment_mode == "terraform" && local.create_agent_infrastructure && !var.alz_platform_landing_zone_mode_enabled ? 1 : 0
 
   parent_id   = module.resource_group["state"].resource_id
   domain_name = "privatelink.blob.core.windows.net"
@@ -24,8 +24,8 @@ module "storage_account" {
   resource_group_name           = module.resource_group["state"].name
   account_tier                  = "Standard"
   account_replication_type      = "ZRS"
-  public_network_access_enabled = !var.use_self_hosted_agents
-  network_rules                 = var.use_self_hosted_agents ? {} : null
+  public_network_access_enabled = !local.create_agent_infrastructure
+  network_rules                 = local.create_agent_infrastructure ? {} : null
 
   containers = { for env_key, env_value in var.environments : env_key => {
     name          = env_key
@@ -44,7 +44,7 @@ module "storage_account" {
   }
 
   private_endpoints_manage_dns_zone_group = !var.alz_platform_landing_zone_mode_enabled
-  private_endpoints = var.use_self_hosted_agents ? { blob = {
+  private_endpoints = local.create_agent_infrastructure ? { blob = {
     name                          = local.resource_names.storage_account_private_endpoint_name
     subnet_resource_id            = module.virtual_network[0].subnets["private_endpoints"].resource_id
     subresource_name              = "blob"

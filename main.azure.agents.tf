@@ -2,7 +2,7 @@ module "azure_devops_agents" {
   source  = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
   version = "0.5.2"
 
-  count = var.use_self_hosted_agents ? 1 : 0
+  count = local.create_agent_infrastructure ? 1 : 0
 
   resource_group_creation_enabled               = false
   resource_group_name                           = module.resource_group["agents"].name

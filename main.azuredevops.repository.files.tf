@@ -3,8 +3,8 @@ locals {
     name                          = lower(replace(environment_key, "-", ""))
     display_name                  = environment_value.display_name
     variable_group_name           = environment_key
-    agent_pool_type               = var.use_self_hosted_agents ? "self-hosted" : "microsoft-hosted"
-    agent_pool_name               = var.use_self_hosted_agents ? "${azuredevops_agent_pool.this[0].name}" : "ubuntu-latest"
+    agent_pool_type               = local.is_self_hosted ? "self-hosted" : "microsoft-hosted"
+    agent_pool_name               = local.is_self_hosted ? local.effective_agent_pool_name : "ubuntu-latest"
     service_connection_name_plan  = "service-connection-${environment_key}-plan"
     service_connection_name_apply = "service-connection-${environment_key}-apply"
     environment_name              = environment_key
