@@ -59,6 +59,16 @@ variable "azure_devops_project" {
   default     = null
 }
 
+variable "deployment_mode" {
+  type        = string
+  default     = "terraform"
+  description = "The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state."
+  validation {
+    condition     = contains(["terraform", "bicep", "other"], var.deployment_mode)
+    error_message = "deployment_mode must be 'terraform', 'bicep', or 'other'."
+  }
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true

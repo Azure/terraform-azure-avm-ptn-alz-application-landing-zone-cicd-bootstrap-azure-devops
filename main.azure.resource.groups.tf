@@ -1,16 +1,21 @@
 locals {
-  resource_groups = merge({
-    state = {
-      name = local.resource_names.resource_group_state_name
-    }
-    identity = {
-      name = local.resource_names.resource_group_identity_name
-    }
-    }, var.use_self_hosted_agents ? {
-    agents = {
-      name = local.resource_names.resource_group_agents_name
-    }
-  } : {})
+  resource_groups = merge(
+    var.deployment_mode == "terraform" ? {
+      state = {
+        name = local.resource_names.resource_group_state_name
+      }
+    } : {},
+    {
+      identity = {
+        name = local.resource_names.resource_group_identity_name
+      }
+    },
+    var.use_self_hosted_agents ? {
+      agents = {
+        name = local.resource_names.resource_group_agents_name
+      }
+    } : {},
+  )
 
   resource_groups_environments = { for env_key, env_value in local.environments : env_key => {
     name = env_value.resource_group_name

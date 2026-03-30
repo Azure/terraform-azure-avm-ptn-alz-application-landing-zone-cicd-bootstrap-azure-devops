@@ -1,5 +1,5 @@
 resource "azuredevops_variable_group" "this" {
-  for_each     = var.environments
+  for_each     = var.deployment_mode == "terraform" ? var.environments : {}
   project_id   = local.azure_devops_project_id
   name         = each.key
   description  = "Variable Group for ${each.value.display_name}"
@@ -19,7 +19,7 @@ resource "azuredevops_variable_group" "this" {
 
   variable {
     name  = "BACKEND_AZURE_STORAGE_ACCOUNT_NAME"
-    value = module.storage_account.name
+    value = module.storage_account[0].name
   }
 
   variable {
