@@ -33,5 +33,5 @@ module "test" {
   organization_name   = var.organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
-  agent_pool_name     = "my-existing-agent-pool"
+  existing_agent_pool_name = "my-existing-agent-pool"
 }

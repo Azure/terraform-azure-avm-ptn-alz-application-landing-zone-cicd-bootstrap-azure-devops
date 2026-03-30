@@ -34,6 +34,6 @@ module "test" {
   enable_telemetry       = var.enable_telemetry
   deployment_mode        = "bicep"
   example_module_path    = "examples/bicep-example-module"
-  self_hosted_agent_type = "azure_container_app"
+  compute_type = "azure_container_app"
   use_self_hosted_agents = true
 }

@@ -33,6 +33,6 @@ module "test" {
   organization_name     = var.organization_name
   enable_telemetry      = var.enable_telemetry
   example_module_path   = "examples/terraform-example-module"
-  self_hosted_agent_type = "azure_container_instance"
+  compute_type           = "azure_container_instance"
   use_self_hosted_agents = true
 }

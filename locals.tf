@@ -14,22 +14,22 @@ locals {
 
 locals {
   default_audience_name          = "api://AzureADTokenExchange"
-  organization_name_url          = "${var.organization_name_prefix}/${var.organization_name}"
-  create_agent_infrastructure    = var.use_self_hosted_agents && var.agent_pool_name == null
-  create_vnet_infrastructure     = local.create_agent_infrastructure && var.virtual_network_resource_id == null
-  is_self_hosted                 = var.use_self_hosted_agents || var.agent_pool_name != null
-  effective_agent_pool_name      = var.agent_pool_name != null ? var.agent_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
-  effective_vnet_resource_id     = var.virtual_network_resource_id != null ? var.virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
-  effective_agents_subnet_id     = var.agents_subnet_resource_id != null ? var.agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
-  effective_pe_subnet_id         = var.private_endpoints_subnet_resource_id != null ? var.private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
+  organization_name_url          = "${var.organization_url_prefix}/${var.organization_name}"
+  create_agent_infrastructure    = var.use_self_hosted_agents && var.existing_agent_pool_name == null
+  create_vnet_infrastructure     = local.create_agent_infrastructure && var.existing_virtual_network_resource_id == null
+  is_self_hosted                 = var.use_self_hosted_agents || var.existing_agent_pool_name != null
+  effective_agent_pool_name      = var.existing_agent_pool_name != null ? var.existing_agent_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
+  effective_vnet_resource_id     = var.existing_virtual_network_resource_id != null ? var.existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
+  effective_agents_subnet_id     = var.existing_agents_subnet_resource_id != null ? var.existing_agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
+  effective_pe_subnet_id         = var.existing_private_endpoints_subnet_resource_id != null ? var.existing_private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
   use_private_networking         = local.effective_vnet_resource_id != null
-  create_template_repository     = var.template_repository_name == null
-  effective_template_repo_name   = var.template_repository_name != null ? var.template_repository_name : azuredevops_git_repository.template[0].name
+  create_template_repository     = var.existing_template_repository_name == null
+  effective_template_repo_name   = var.existing_template_repository_name != null ? var.existing_template_repository_name : azuredevops_git_repository.template[0].name
   effective_ci_template_path     = coalesce(var.ci_template_path, "ci-template.yaml")
   effective_cd_template_path     = coalesce(var.cd_template_path, "cd-template.yaml")
-  create_approval_group          = var.approvers_group_origin_id == null && length(var.approvers) > 0
-  effective_approvers_origin_id  = var.approvers_group_origin_id != null ? var.approvers_group_origin_id : (local.create_approval_group ? azuredevops_group.this[0].origin_id : null)
-  has_approvers                  = var.approvers_group_origin_id != null || length(var.approvers) > 0
+  create_approval_group          = var.existing_approvers_group_origin_id == null && length(var.approvers) > 0
+  effective_approvers_origin_id  = var.existing_approvers_group_origin_id != null ? var.existing_approvers_group_origin_id : (local.create_approval_group ? azuredevops_group.this[0].origin_id : null)
+  has_approvers                  = var.existing_approvers_group_origin_id != null || length(var.approvers) > 0
 }
 
 locals {
