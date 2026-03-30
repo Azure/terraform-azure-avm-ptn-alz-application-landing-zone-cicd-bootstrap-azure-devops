@@ -2,7 +2,7 @@ module "private_dns_zone_storage_account" {
   source  = "Azure/avm-res-network-privatednszone/azurerm"
   version = "0.3.2"
 
-  count = var.use_self_hosted_agents ? 1 : 0
+  count = var.use_self_hosted_agents && !var.alz_platform_landing_zone_mode_enabled ? 1 : 0
 
   resource_group_name = module.resource_group["state"].name
   domain_name         = "privatelink.blob.core.windows.net"
@@ -42,12 +42,12 @@ module "storage_account" {
     }
   }
 
-  private_endpoints_manage_dns_zone_group = true
+  private_endpoints_manage_dns_zone_group = !var.alz_platform_landing_zone_mode_enabled
   private_endpoints = var.use_self_hosted_agents ? { blob = {
     name                          = local.resource_names.storage_account_private_endpoint_name
     subnet_resource_id            = module.virtual_network[0].subnets["private_endpoints"].resource_id
     subresource_name              = "blob"
-    private_dns_zone_resource_ids = [module.private_dns_zone_storage_account[0].resource_id]
+    private_dns_zone_resource_ids = !var.alz_platform_landing_zone_mode_enabled ? [module.private_dns_zone_storage_account[0].resource_id] : []
     }
   } : {}
 }

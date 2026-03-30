@@ -35,6 +35,12 @@ variable "agent_use_availability_zones" {
   description = "Use availability zones for the agent pool if using container instances. This is off by default due to faults in various regions at time of authoring."
 }
 
+variable "alz_platform_landing_zone_mode_enabled" {
+  type        = bool
+  default     = false
+  description = "When enabled, the module will not create private DNS zones and will not manage DNS zone groups for private endpoints. This is useful when the platform landing zone is managing DNS zones centrally via Azure Policy."
+}
+
 variable "approvers" {
   type        = map(string)
   description = "A map of approvers for the production environment. The key is the approver name and the value is the user principal name."
