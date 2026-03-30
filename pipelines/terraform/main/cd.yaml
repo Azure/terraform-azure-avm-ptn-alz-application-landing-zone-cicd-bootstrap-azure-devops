@@ -45,8 +45,8 @@ extends:
 %{ for environment in environments ~}
       - name: ${environment.name}
         display_name: ${environment.display_name}
-        service_connection_name_plan: ${environment.service_connection_name_plan}
-        service_connection_name_apply: ${environment.service_connection_name_apply}
+        service_connection_name_read: ${environment.service_connection_name_read}
+        service_connection_name_write: ${environment.service_connection_name_write}
         variable_group_name: ${environment.variable_group_name}
         agent_pool_type: ${environment.agent_pool_type}
         agent_pool_name: ${environment.agent_pool_name}

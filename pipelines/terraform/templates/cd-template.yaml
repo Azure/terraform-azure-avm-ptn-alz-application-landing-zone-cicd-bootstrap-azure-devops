@@ -40,7 +40,7 @@ stages:
                       terraformVersion: ${{ parameters.terraform_cli_version }}
                   - template: helpers/terraform-init.yaml
                     parameters:
-                      serviceConnection: ${{ environment.service_connection_name_plan }}
+                      serviceConnection: ${{ environment.service_connection_name_read }}
                       backendAzureResourceGroupName: $(BACKEND_AZURE_RESOURCE_GROUP_NAME)
                       backendAzureStorageAccountName: $(BACKEND_AZURE_STORAGE_ACCOUNT_NAME)
                       backendAzureStorageAccountContainerName: $(BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME)
@@ -48,7 +48,7 @@ stages:
                   - template: helpers/terraform-plan.yaml
                     parameters:
                       terraform_action: ${{ parameters.terraform_action }}
-                      serviceConnection: ${{ environment.service_connection_name_plan }}
+                      serviceConnection: ${{ environment.service_connection_name_read }}
                       root_module_folder_relative_path: ${{ parameters.root_module_folder_relative_path }}
                       additionalVariables: $(ADDITIONAL_ENVIRONMENT_VARIABLES)
                       varFilePath: $(VAR_FILE_PATH)
@@ -111,7 +111,7 @@ stages:
                       terraformVersion: ${{ parameters.terraform_cli_version }}
                   - template: helpers/terraform-init.yaml
                     parameters:
-                      serviceConnection: ${{ environment.service_connection_name_apply }}
+                      serviceConnection: ${{ environment.service_connection_name_write }}
                       backendAzureResourceGroupName: $(BACKEND_AZURE_RESOURCE_GROUP_NAME)
                       backendAzureStorageAccountName: $(BACKEND_AZURE_STORAGE_ACCOUNT_NAME)
                       backendAzureStorageAccountContainerName: $(BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME)
@@ -119,5 +119,5 @@ stages:
                   - template: helpers/terraform-apply.yaml
                     parameters:
                       terraform_action: ${{ parameters.terraform_action }}
-                      serviceConnection: ${{ environment.service_connection_name_apply }}
+                      serviceConnection: ${{ environment.service_connection_name_write }}
                       root_module_folder_relative_path: ${{ parameters.root_module_folder_relative_path }}

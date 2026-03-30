@@ -22,7 +22,7 @@ locals {
       composite_key      = "${env_key}-${pipeline_key}"
       service_connection = env_key
       pipeline           = pipeline_key
-      is_valid           = env_value.type == "plan" || env_value.type == "apply" && pipeline_key == "cd"
+      is_valid           = env_value.type == "read" || env_value.type == "write" && pipeline_key == "cd"
     }
   ]]) : environment_split.composite_key => environment_split if environment_split.is_valid }
 }

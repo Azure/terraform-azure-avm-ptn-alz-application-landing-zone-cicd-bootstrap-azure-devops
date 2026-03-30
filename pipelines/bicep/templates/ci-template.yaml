@@ -26,7 +26,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Install Bicep CLI'
             inputs:
-              azureSubscription: ${{ parameters.environments[0].service_connection_name_plan }}
+              azureSubscription: ${{ parameters.environments[0].service_connection_name_read }}
               scriptType: pscore
               scriptLocation: inlineScript
               inlineScript: |
@@ -60,7 +60,7 @@ stages:
                     - task: AzureCLI@2
                       displayName: 'What-If - ${{ deployment.name }}'
                       inputs:
-                        azureSubscription: ${{ environment.service_connection_name_plan }}
+                        azureSubscription: ${{ environment.service_connection_name_read }}
                         scriptType: pscore
                         scriptLocation: inlineScript
                         inlineScript: |

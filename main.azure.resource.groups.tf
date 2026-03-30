@@ -35,32 +35,20 @@ module "resource_group_environments" {
   for_each = local.environments_create_rg
   location = var.location
   name     = each.value.resource_group_name
-  role_assignments = {
-    plan = {
-      role_definition_id_or_name = each.value.plan_role_definition_id_or_name
-      principal_id               = module.user_assigned_managed_identity["${each.key}-plan"].principal_id
-    }
-    apply = {
-      role_definition_id_or_name = each.value.apply_role_definition_id_or_name
-      principal_id               = module.user_assigned_managed_identity["${each.key}-apply"].principal_id
-    }
-  }
+  role_assignments = { for identity_key, identity_value in each.value.identities : identity_key => {
+    role_definition_id_or_name = identity_value.role_definition_id_or_name
+    principal_id               = module.user_assigned_managed_identity["${each.key}-${identity_key}"].principal_id
+  } }
 }
 
 locals {
   byo_scope_role_assignments = { for ra in flatten([for env_key, env_value in local.environments_byo_scope : [
-    {
-      key                        = "${env_key}-plan"
+    for identity_key, identity_value in env_value.identities : {
+      key                        = "${env_key}-${identity_key}"
       scope                      = env_value.resource_id
-      role_definition_id_or_name = env_value.plan_role_definition_id_or_name
-      principal_id               = module.user_assigned_managed_identity["${env_key}-plan"].principal_id
-    },
-    {
-      key                        = "${env_key}-apply"
-      scope                      = env_value.resource_id
-      role_definition_id_or_name = env_value.apply_role_definition_id_or_name
-      principal_id               = module.user_assigned_managed_identity["${env_key}-apply"].principal_id
-    },
+      role_definition_id_or_name = identity_value.role_definition_id_or_name
+      principal_id               = module.user_assigned_managed_identity["${env_key}-${identity_key}"].principal_id
+    }
   ]]) : ra.key => ra }
 }
 

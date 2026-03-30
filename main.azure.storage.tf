@@ -30,16 +30,10 @@ module "storage_account" {
   containers = { for env_key, env_value in local.environments : env_key => {
     name          = env_key
     public_access = "None"
-    role_assignments = {
-      user_assignment_managed_identity-plan = {
-        role_definition_id_or_name = "Storage Blob Data Contributor"
-        principal_id               = module.user_assigned_managed_identity["${env_key}-plan"].principal_id
-      }
-      user_assignment_managed_identity-apply = {
-        role_definition_id_or_name = "Storage Blob Data Contributor"
-        principal_id               = module.user_assigned_managed_identity["${env_key}-apply"].principal_id
-      }
-    }
+    role_assignments = { for identity_key, identity_value in env_value.identities : "uami-${identity_key}" => {
+      role_definition_id_or_name = "Storage Blob Data Contributor"
+      principal_id               = module.user_assigned_managed_identity["${env_key}-${identity_key}"].principal_id
+    } }
     }
   }
 
