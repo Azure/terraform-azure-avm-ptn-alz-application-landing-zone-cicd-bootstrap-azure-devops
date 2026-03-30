@@ -1,13 +1,15 @@
+module "ip_addresses" {
+  source  = "Azure/avm-utl-network-ip-addresses/azurerm"
+  version = "0.1.1"
+
+  count = local.create_vnet_infrastructure ? 1 : 0
+
+  address_space    = var.azure_address_space
+  address_prefixes = var.azure_subnets_and_sizes
+}
+
 locals {
-  address_space_split           = split("/", var.azure_address_space)
-  address_space_start_ip        = local.address_space_split[0]
-  address_space_size            = tonumber(local.address_space_split[1])
-  order_by_size                 = { for key, value in var.azure_subnets_and_sizes : "${format("%03s", value)}||${key}" => value }
-  virtual_network_address_space = "${local.address_space_start_ip}/${local.address_space_size}"
-  subnet_keys                   = keys(local.order_by_size)
-  subnet_new_bits               = [for size in values(local.order_by_size) : size - local.address_space_size]
-  cidr_subnets                  = cidrsubnets(local.virtual_network_address_space, local.subnet_new_bits...)
-  subnets                       = { for key, value in local.order_by_size : split("||", key)[1] => local.cidr_subnets[index(local.subnet_keys, key)] }
+  subnets = local.create_vnet_infrastructure ? module.ip_addresses[0].address_prefixes : {}
 
   subnet_delegation_type = var.agent_compute_type == "azure_container_app" ? "Microsoft.App/environments" : "Microsoft.ContainerInstance/containerGroups"
   subnet_delegations = { for key, value in var.azure_subnets_and_sizes : key => key == "agents" ? [
