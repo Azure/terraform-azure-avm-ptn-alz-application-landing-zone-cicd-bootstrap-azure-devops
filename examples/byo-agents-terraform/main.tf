@@ -30,8 +30,8 @@ module "test" {
   source = "../../"
 
   location            = var.location
-  organization_name   = var.organization_name
+  azuredevops_organization_name   = var.azuredevops_organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
-  existing_agent_pool_name = "my-existing-agent-pool"
+  agent_existing_pool_name = "my-existing-agent-pool"
 }

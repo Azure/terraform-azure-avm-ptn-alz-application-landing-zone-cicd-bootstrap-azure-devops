@@ -30,10 +30,10 @@ module "test" {
   source = "../../"
 
   location               = var.location
-  organization_name      = var.organization_name
+  azuredevops_organization_name      = var.azuredevops_organization_name
   enable_telemetry       = var.enable_telemetry
   deployment_mode        = "bicep"
   example_module_path    = "examples/bicep-example-module"
   compute_type = "azure_container_app"
-  use_self_hosted_agents = true
+  agent_use_self_hosted = true
 }

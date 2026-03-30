@@ -57,7 +57,7 @@ variable "approvers" {
   default     = {}
 }
 
-variable "existing_approvers_group_origin_id" {
+variable "azuredevops_existing_approvers_group_origin_id" {
   type        = string
   default     = null
   description = "The origin ID of a pre-existing Azure DevOps group to use for approvals (BYO mode). When set, the module will not create an approval group or look up approver users."

@@ -11,7 +11,7 @@ module "user_assigned_managed_identity" {
 resource "azapi_resource" "federated_identity_credential" {
   for_each  = local.environment_split
   type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31"
-  name      = "${var.organization_name}-${local.azure_devops_project_name}-${each.key}"
+  name      = "${var.azuredevops_organization_name}-${local.azure_devops_project_name}-${each.key}"
   parent_id = module.user_assigned_managed_identity[each.key].resource_id
   body = {
     properties = {

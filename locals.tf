@@ -14,22 +14,22 @@ locals {
 
 locals {
   default_audience_name          = "api://AzureADTokenExchange"
-  organization_name_url          = "${var.organization_url_prefix}/${var.organization_name}"
-  create_agent_infrastructure    = var.use_self_hosted_agents && var.existing_agent_pool_name == null
-  create_vnet_infrastructure     = local.create_agent_infrastructure && var.existing_virtual_network_resource_id == null
-  is_self_hosted                 = var.use_self_hosted_agents || var.existing_agent_pool_name != null
-  effective_agent_pool_name      = var.existing_agent_pool_name != null ? var.existing_agent_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
-  effective_vnet_resource_id     = var.existing_virtual_network_resource_id != null ? var.existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
-  effective_agents_subnet_id     = var.existing_agents_subnet_resource_id != null ? var.existing_agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
-  effective_pe_subnet_id         = var.existing_private_endpoints_subnet_resource_id != null ? var.existing_private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
+  organization_name_url          = "${var.azuredevops_organization_url_prefix}/${var.azuredevops_organization_name}"
+  create_agent_infrastructure    = var.agent_use_self_hosted && var.agent_existing_pool_name == null
+  create_vnet_infrastructure     = local.create_agent_infrastructure && var.azure_existing_virtual_network_resource_id == null
+  is_self_hosted                 = var.agent_use_self_hosted || var.agent_existing_pool_name != null
+  effective_agent_pool_name      = var.agent_existing_pool_name != null ? var.agent_existing_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
+  effective_vnet_resource_id     = var.azure_existing_virtual_network_resource_id != null ? var.azure_existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
+  effective_agents_subnet_id     = var.azure_existing_agents_subnet_resource_id != null ? var.azure_existing_agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
+  effective_pe_subnet_id         = var.azure_existing_private_endpoints_subnet_resource_id != null ? var.azure_existing_private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
   use_private_networking         = local.effective_vnet_resource_id != null
-  create_template_repository     = var.existing_template_repository_name == null
-  effective_template_repo_name   = var.existing_template_repository_name != null ? var.existing_template_repository_name : azuredevops_git_repository.template[0].name
-  effective_ci_template_path     = coalesce(var.ci_template_path, "ci-template.yaml")
-  effective_cd_template_path     = coalesce(var.cd_template_path, "cd-template.yaml")
-  create_approval_group          = var.existing_approvers_group_origin_id == null && length(var.approvers) > 0
-  effective_approvers_origin_id  = var.existing_approvers_group_origin_id != null ? var.existing_approvers_group_origin_id : (local.create_approval_group ? azuredevops_group.this[0].origin_id : null)
-  has_approvers                  = var.existing_approvers_group_origin_id != null || length(var.approvers) > 0
+  create_template_repository     = var.azuredevops_existing_template_repository_name == null
+  effective_template_repo_name   = var.azuredevops_existing_template_repository_name != null ? var.azuredevops_existing_template_repository_name : azuredevops_git_repository.template[0].name
+  effective_ci_template_path     = coalesce(var.azuredevops_ci_template_path, "ci-template.yaml")
+  effective_cd_template_path     = coalesce(var.azuredevops_cd_template_path, "cd-template.yaml")
+  create_approval_group          = var.azuredevops_existing_approvers_group_origin_id == null && length(var.approvers) > 0
+  effective_approvers_origin_id  = var.azuredevops_existing_approvers_group_origin_id != null ? var.azuredevops_existing_approvers_group_origin_id : (local.create_approval_group ? azuredevops_group.this[0].origin_id : null)
+  has_approvers                  = var.azuredevops_existing_approvers_group_origin_id != null || length(var.approvers) > 0
 }
 
 locals {

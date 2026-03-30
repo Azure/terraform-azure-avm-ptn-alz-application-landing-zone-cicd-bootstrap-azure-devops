@@ -27,7 +27,7 @@ locals {
     deployments                      = var.bicep_deployments != null ? var.bicep_deployments : []
   }
 
-  effective_pipeline_folder = var.pipeline_folder_path != null ? var.pipeline_folder_path : (
+  effective_pipeline_folder = var.azuredevops_pipeline_folder_path != null ? var.azuredevops_pipeline_folder_path : (
     contains(["terraform", "bicep"], var.deployment_mode) ? "pipelines/${var.deployment_mode}" : null
   )
 

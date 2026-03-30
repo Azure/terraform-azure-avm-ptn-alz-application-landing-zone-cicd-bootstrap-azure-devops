@@ -14,7 +14,7 @@ variable "location" {
   default     = "uksouth"
 }
 
-variable "organization_name" {
+variable "azuredevops_organization_name" {
   type        = string
   description = "The name of the Azure DevOps organization."
 }
