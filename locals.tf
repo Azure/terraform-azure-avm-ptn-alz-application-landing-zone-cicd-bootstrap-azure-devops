@@ -38,7 +38,10 @@ locals {
     display_name          = value.display_name
     has_approval          = value.has_approval
     dependent_environment = value.dependent_environment
-    resource_group_create = value.resource_group_create
+    scope                 = value.scope
+    subscription_id       = coalesce(value.subscription_id, data.azurerm_client_config.current.subscription_id)
+    resource_id           = value.resource_id
+    create_resource_group = value.scope == "resource_group" && value.resource_id == null && value.resource_group_create
     resource_group_name = templatestring(value.resource_group_name_template, {
       workload    = local.name_replacements.workload
       environment = key

@@ -7,9 +7,14 @@ resource "azuredevops_variable_group" "this" {
 
   variable {
     name = "ADDITIONAL_ENVIRONMENT_VARIABLES"
-    value = jsonencode({
-      TF_VAR_resource_group_name = module.resource_group_environments[each.key].name
-    })
+    value = jsonencode(merge(
+      local.environments[each.key].create_resource_group ? {
+        TF_VAR_resource_group_name = module.resource_group_environments[each.key].name
+      } : {},
+      local.environments[each.key].scope == "subscription" || local.environments[each.key].scope == "management_group" ? {
+        TF_VAR_subscription_id = local.environments[each.key].subscription_id
+      } : {},
+    ))
   }
 
   variable {

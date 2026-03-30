@@ -150,11 +150,22 @@ variable "environments" {
     display_name                                 = string
     has_approval                                 = optional(bool, false)
     dependent_environment                        = optional(string, "")
+    scope                                        = optional(string, "resource_group")
+    subscription_id                              = optional(string)
+    resource_id                                  = optional(string)
     resource_group_create                        = optional(bool, true)
     resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
     user_assigned_managed_identity_name_template = optional(string, "uami-$${workload}-$${environment}-$${type}-$${location}-$${sequence}")
   }))
-  description = "A map of environments to create. Each environment has a display order, display name, optional approval settings, and optional resource group and managed identity naming templates."
+  description = <<DESCRIPTION
+A map of environments to create. Each environment has the following properties:
+- `display_order` - (Required) The order to display the environment.
+- `display_name` - (Required) The display name of the environment.
+- `scope` - (Optional) The deployment scope: 'resource_group', 'subscription', or 'management_group'. Defaults to 'resource_group'.
+- `subscription_id` - (Optional) The subscription ID for the environment. Defaults to the current subscription. Always required for service connections.
+- `resource_id` - (Optional) The resource ID of the target scope. For 'resource_group' scope with BYO RG, supply the resource group resource ID.
+- `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource_group' and resource_id is not set. Defaults to `true`.
+DESCRIPTION
   default = {
     dev = {
       display_order = 1
@@ -171,6 +182,10 @@ variable "environments" {
       has_approval          = true
       dependent_environment = "test"
     }
+  }
+  validation {
+    condition     = alltrue([for k, v in var.environments : contains(["resource_group", "subscription", "management_group"], v.scope)])
+    error_message = "Each environment scope must be 'resource_group', 'subscription', or 'management_group'."
   }
 }
 
