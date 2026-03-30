@@ -23,6 +23,12 @@ variable "personal_access_token" {
   sensitive   = true
 }
 
+variable "private_endpoints_subnet_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing subnet for private endpoints (BYO mode). When set along with `agents_subnet_resource_id`, the module will not create a virtual network."
+}
+
 variable "address_space" {
   type        = string
   description = "The virtual network address space."
@@ -39,6 +45,12 @@ variable "agent_use_availability_zones" {
   type        = bool
   default     = false
   description = "Use availability zones for the agent pool if using container instances. This is off by default due to faults in various regions at time of authoring."
+}
+
+variable "agents_subnet_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing subnet for agents/runners (BYO mode). When set along with `private_endpoints_subnet_resource_id`, the module will not create a virtual network. The subnet must have the appropriate delegation for the chosen `self_hosted_agent_type`."
 }
 
 variable "alz_platform_landing_zone_mode_enabled" {
@@ -240,6 +252,12 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "virtual_network_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing virtual network to use (BYO mode). Must be set together with `agents_subnet_resource_id` and `private_endpoints_subnet_resource_id`. When set, the module will not create a virtual network or agents resource group."
 }
 
 variable "use_self_hosted_agents" {

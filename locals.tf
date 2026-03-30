@@ -16,8 +16,13 @@ locals {
   default_audience_name          = "api://AzureADTokenExchange"
   organization_name_url          = "${var.organization_name_prefix}/${var.organization_name}"
   create_agent_infrastructure    = var.use_self_hosted_agents && var.agent_pool_name == null
+  create_vnet_infrastructure     = local.create_agent_infrastructure && var.virtual_network_resource_id == null
   is_self_hosted                 = var.use_self_hosted_agents || var.agent_pool_name != null
   effective_agent_pool_name      = var.agent_pool_name != null ? var.agent_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : "ubuntu-latest")
+  effective_vnet_resource_id     = var.virtual_network_resource_id != null ? var.virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
+  effective_agents_subnet_id     = var.agents_subnet_resource_id != null ? var.agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
+  effective_pe_subnet_id         = var.private_endpoints_subnet_resource_id != null ? var.private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
+  use_private_networking         = local.effective_vnet_resource_id != null
 }
 
 locals {

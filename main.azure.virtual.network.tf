@@ -23,7 +23,7 @@ locals {
 module "virtual_network" {
   source              = "Azure/avm-res-network-virtualnetwork/azurerm"
   version             = "0.17.1"
-  count               = local.create_agent_infrastructure ? 1 : 0
+  count               = local.create_vnet_infrastructure ? 1 : 0
   name                = local.resource_names.virtual_network_name
   location            = var.location
   parent_id           = module.resource_group["agents"].resource_id
