@@ -36,6 +36,8 @@ locals {
         location    = local.name_replacements.location
         sequence    = local.name_replacements.sequence
       })
+      service_connection_name = "${local.resource_names.service_connection_name}-${env_key}-${split_key}"
+      federated_credential_name = "${local.resource_names.federated_credential_name}-${env_key}-${split_key}"
     }
   ]]) : environment_split.composite_key => environment_split }
 }

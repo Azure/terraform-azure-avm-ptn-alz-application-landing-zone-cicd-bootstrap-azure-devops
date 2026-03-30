@@ -5,8 +5,8 @@ locals {
     variable_group_name           = environment_key
     agent_pool_type               = local.is_self_hosted ? "self-hosted" : "microsoft-hosted"
     agent_pool_name               = local.is_self_hosted ? local.effective_agent_pool_name : "ubuntu-latest"
-    service_connection_name_plan  = "service-connection-${environment_key}-plan"
-    service_connection_name_apply = "service-connection-${environment_key}-apply"
+    service_connection_name_plan  = "${local.resource_names.service_connection_name}-${environment_key}-plan"
+    service_connection_name_apply = "${local.resource_names.service_connection_name}-${environment_key}-apply"
     environment_name              = environment_key
     dependent_environment         = environment_value.dependent_environment
   } }

@@ -71,5 +71,7 @@ variable "resource_name_templates" {
     repository_template_name              = "$${workload}-$${environment}-template"
     agent_pool_name                       = "agent-pool-$${workload}-$${environment}"
     group_name                            = "group-$${workload}-$${environment}-approvers"
+    service_connection_name                = "service-connection-$${workload}-$${environment}"
+    federated_credential_name             = "$${workload}-$${environment}"
   }
 }
