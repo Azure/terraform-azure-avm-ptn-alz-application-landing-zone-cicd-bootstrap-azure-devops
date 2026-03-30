@@ -21,8 +21,7 @@ locals {
     environments                     = local.environment_replacements
     project_name                     = local.azure_devops_project_name
     repository_name_templates        = local.effective_template_repo_name
-    cd_template_path                 = local.effective_cd_template_path
-    ci_template_path                 = local.effective_ci_template_path
+    pipelines                        = local.effective_pipelines
     root_module_folder_relative_path = "."
     deployments                      = var.bicep_deployments != null ? var.bicep_deployments : []
   }

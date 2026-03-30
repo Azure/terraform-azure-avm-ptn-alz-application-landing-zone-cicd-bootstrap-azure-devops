@@ -17,7 +17,7 @@ parameters:
 lockBehavior: sequential
 
 extends:
-  template: ${ci_template_path}@templates
+  template: ${pipelines["ci"].template_path}@templates
   parameters:
     root_module_folder_relative_path: ${root_module_folder_relative_path}
     terraform_cli_version: $${{ coalesce(parameters.terraform_cli_version, 'latest') }}

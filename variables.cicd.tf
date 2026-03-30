@@ -69,14 +69,18 @@ variable "azuredevops_pipeline_folder_path" {
   description = "The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
 }
 
-variable "azuredevops_ci_template_path" {
-  type        = string
+variable "azuredevops_pipelines" {
+  type = map(object({
+    main_file     = string
+    template_path = string
+  }))
   default     = null
-  description = "The path to the CI template within the template repository. When null, defaults to 'ci-template.yaml'."
-}
-
-variable "azuredevops_cd_template_path" {
-  type        = string
-  default     = null
-  description = "The path to the CD template within the template repository. When null, defaults to 'cd-template.yaml'."
+  description = <<DESCRIPTION
+A map of pipelines to create in the main repository. Each key is the pipeline name, and the value specifies:
+- `main_file` - The source YAML file name within the pipeline folder's main/ directory.
+- `template_path` - The path to the template within the template repository.
+When null, defaults based on deployment_mode:
+  terraform: { ci = { main_file = "ci.yaml", template_path = "ci-template.yaml" }, cd = { main_file = "cd.yaml", template_path = "cd-template.yaml" } }
+  bicep: same structure
+DESCRIPTION
 }

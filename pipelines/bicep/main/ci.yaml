@@ -17,7 +17,7 @@ parameters:
 lockBehavior: sequential
 
 extends:
-  template: ${ci_template_path}@templates
+  template: ${pipelines["ci"].template_path}@templates
   parameters:
     root_module_folder_relative_path: ${root_module_folder_relative_path}
     bicep_cli_version: $${{ coalesce(parameters.bicep_cli_version, 'latest') }}

@@ -35,7 +35,7 @@ parameters:
 lockBehavior: sequential
 
 extends:
-  template: ${cd_template_path}@templates
+  template: ${pipelines["cd"].template_path}@templates
   parameters:
     terraform_action: $${{ parameters.terraform_action }}
     root_module_folder_relative_path: ${root_module_folder_relative_path}

@@ -11,15 +11,17 @@ variable "environments" {
     resource_group_create                        = optional(bool, true)
     identities = optional(object({
       read = optional(object({
-        enabled        = optional(bool, true)
-        name           = optional(string)
+        enabled            = optional(bool, true)
+        name               = optional(string)
+        allowed_template_keys = optional(list(string))
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
         })), { default = { role_definition_id_or_name = "Reader" } })
       }), {})
       write = optional(object({
-        enabled        = optional(bool, true)
-        name           = optional(string)
+        enabled            = optional(bool, true)
+        name               = optional(string)
+        allowed_template_keys = optional(list(string))
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
         })), { default = { role_definition_id_or_name = "Contributor" } })
@@ -40,6 +42,7 @@ A map of environments to create. Each environment has the following properties:
 - `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
   - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
   - `name` - (Optional) Explicit identity name. When null, generated from `identity_read_name` or `identity_write_name` template in `resource_name_templates`.
+  - `allowed_template_keys` - (Optional) Pipeline keys this identity is allowed to use for service connection checks. When null, read gets all pipelines, write gets only 'cd'.
   - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
 DESCRIPTION
   default = {
