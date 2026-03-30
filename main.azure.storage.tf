@@ -1,11 +1,11 @@
 module "private_dns_zone_storage_account" {
   source  = "Azure/avm-res-network-privatednszone/azurerm"
-  version = "0.3.2"
+  version = "0.5.0"
 
   count = var.deployment_mode == "terraform" && var.use_self_hosted_agents && !var.alz_platform_landing_zone_mode_enabled ? 1 : 0
 
-  resource_group_name = module.resource_group["state"].name
-  domain_name         = "privatelink.blob.core.windows.net"
+  parent_id   = module.resource_group["state"].resource_id
+  domain_name = "privatelink.blob.core.windows.net"
 
   virtual_network_links = {
     vnet_link = {
@@ -17,7 +17,7 @@ module "private_dns_zone_storage_account" {
 
 module "storage_account" {
   source                        = "Azure/avm-res-storage-storageaccount/azurerm"
-  version                       = "0.5.0"
+  version                       = "0.6.8"
   count                         = var.deployment_mode == "terraform" ? 1 : 0
   name                          = local.resource_names.storage_account_name
   location                      = var.location

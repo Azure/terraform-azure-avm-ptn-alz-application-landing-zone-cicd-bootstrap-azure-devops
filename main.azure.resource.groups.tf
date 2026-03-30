@@ -35,7 +35,7 @@ locals {
 
 module "resource_group" {
   source   = "Azure/avm-res-resources-resourcegroup/azurerm"
-  version  = "0.2.1"
+  version  = "0.2.2"
   for_each = local.resource_groups
   location = var.location
   name     = each.value.name
@@ -43,7 +43,7 @@ module "resource_group" {
 
 module "resource_group_environments" {
   source           = "Azure/avm-res-resources-resourcegroup/azurerm"
-  version          = "0.2.1"
+  version          = "0.2.2"
   for_each         = local.resource_groups_environments
   location         = var.location
   name             = each.value.name

@@ -22,15 +22,15 @@ locals {
 
 module "virtual_network" {
   source              = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version             = "0.8.1"
+  version             = "0.17.1"
   count               = var.use_self_hosted_agents ? 1 : 0
   name                = local.resource_names.virtual_network_name
   location            = var.location
-  resource_group_name = module.resource_group["agents"].name
+  parent_id           = module.resource_group["agents"].resource_id
   address_space       = [var.address_space]
   subnets = { for subnet_key, subnet_address_space in local.subnets : subnet_key => {
     name             = subnet_key
     address_prefixes = [subnet_address_space]
-    delegation       = local.subnet_delegations[subnet_key]
+    delegations      = local.subnet_delegations[subnet_key]
   } }
 }
