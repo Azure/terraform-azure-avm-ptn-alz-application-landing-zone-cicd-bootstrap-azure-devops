@@ -33,7 +33,7 @@ module "test" {
   azuredevops_organization_name      = var.azuredevops_organization_name
   enable_telemetry       = var.enable_telemetry
   deployment_mode        = "bicep"
-  example_module_path    = "examples/bicep-example-module"
+  example_module_path    = "examples/example-module-bicep"
   compute_type = "azure_container_app"
   agent_use_self_hosted = true
 }
