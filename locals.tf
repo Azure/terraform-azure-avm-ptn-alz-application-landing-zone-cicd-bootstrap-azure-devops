@@ -23,6 +23,10 @@ locals {
   effective_agents_subnet_id     = var.agents_subnet_resource_id != null ? var.agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
   effective_pe_subnet_id         = var.private_endpoints_subnet_resource_id != null ? var.private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
   use_private_networking         = local.effective_vnet_resource_id != null
+  create_template_repository     = var.template_repository_name == null
+  effective_template_repo_name   = var.template_repository_name != null ? var.template_repository_name : azuredevops_git_repository.template[0].name
+  effective_ci_template_path     = coalesce(var.ci_template_path, "ci-template.yaml")
+  effective_cd_template_path     = coalesce(var.cd_template_path, "cd-template.yaml")
 }
 
 locals {

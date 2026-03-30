@@ -20,9 +20,9 @@ locals {
   pipeline_main_replacements = {
     environments                     = local.environment_replacements
     project_name                     = local.azure_devops_project_name
-    repository_name_templates        = azuredevops_git_repository.template.name
-    cd_template_path                 = "cd-template.yaml"
-    ci_template_path                 = "ci-template.yaml"
+    repository_name_templates        = local.effective_template_repo_name
+    cd_template_path                 = local.effective_cd_template_path
+    ci_template_path                 = local.effective_ci_template_path
     root_module_folder_relative_path = "."
   }
 
@@ -56,8 +56,8 @@ resource "azuredevops_git_repository_file" "this" {
 }
 
 resource "azuredevops_git_repository_file" "template" {
-  for_each            = local.pipeline_template_files
-  repository_id       = azuredevops_git_repository.template.id
+  for_each            = local.create_template_repository ? local.pipeline_template_files : {}
+  repository_id       = azuredevops_git_repository.template[0].id
   file                = each.key
   content             = each.value.content
   branch              = local.default_branch

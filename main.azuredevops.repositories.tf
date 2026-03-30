@@ -13,6 +13,7 @@ resource "azuredevops_git_repository" "this" {
 }
 
 resource "azuredevops_git_repository" "template" {
+  count          = local.create_template_repository ? 1 : 0
   depends_on     = [azuredevops_environment.this]
   project_id     = local.azure_devops_project_id
   name           = local.resource_names.repository_template_name
@@ -86,6 +87,7 @@ resource "azuredevops_branch_policy_build_validation" "this" {
 }
 
 resource "azuredevops_branch_policy_min_reviewers" "template" {
+  count      = local.create_template_repository ? 1 : 0
   depends_on = [azuredevops_git_repository_file.template]
   project_id = local.azure_devops_project_id
 
@@ -100,14 +102,15 @@ resource "azuredevops_branch_policy_min_reviewers" "template" {
     on_push_reset_approved_votes           = true
 
     scope {
-      repository_id  = azuredevops_git_repository.template.id
-      repository_ref = azuredevops_git_repository.template.default_branch
+      repository_id  = azuredevops_git_repository.template[0].id
+      repository_ref = azuredevops_git_repository.template[0].default_branch
       match_type     = "Exact"
     }
   }
 }
 
 resource "azuredevops_branch_policy_merge_types" "template" {
+  count      = local.create_template_repository ? 1 : 0
   depends_on = [azuredevops_git_repository_file.template]
   project_id = local.azure_devops_project_id
 
@@ -121,8 +124,8 @@ resource "azuredevops_branch_policy_merge_types" "template" {
     allow_rebase_with_merge       = false
 
     scope {
-      repository_id  = azuredevops_git_repository.template.id
-      repository_ref = azuredevops_git_repository.template.default_branch
+      repository_id  = azuredevops_git_repository.template[0].id
+      repository_ref = azuredevops_git_repository.template[0].default_branch
       match_type     = "Exact"
     }
   }

@@ -260,6 +260,24 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
+variable "template_repository_name" {
+  type        = string
+  default     = null
+  description = "The name of a pre-existing template repository containing CI/CD pipeline templates (BYO mode). When set, the module will not create a template repository or push template files. The pipeline YAML in the main repository will reference this repository for templates."
+}
+
+variable "ci_template_path" {
+  type        = string
+  default     = null
+  description = "The path to the CI template within the template repository. When null, defaults to 'ci-template.yaml'."
+}
+
+variable "cd_template_path" {
+  type        = string
+  default     = null
+  description = "The path to the CD template within the template repository. When null, defaults to 'cd-template.yaml'."
+}
+
 variable "virtual_network_resource_id" {
   type        = string
   default     = null
