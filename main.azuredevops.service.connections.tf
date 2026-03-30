@@ -17,14 +17,14 @@ locals {
 }
 
 resource "azuredevops_check_approval" "this" {
-  for_each             = length(var.approvers) == 0 ? {} : local.environments_with_approvals
+  for_each             = local.has_approvers ? local.environments_with_approvals : {}
   project_id           = local.azure_devops_project_id
   target_resource_id   = azuredevops_serviceendpoint_azurerm.this["${each.key}-apply"].id
   target_resource_type = "endpoint"
 
   requester_can_approve = length(var.approvers) == 1
   approvers = [
-    azuredevops_group.this.origin_id
+    local.effective_approvers_origin_id
   ]
 
   timeout = 43200

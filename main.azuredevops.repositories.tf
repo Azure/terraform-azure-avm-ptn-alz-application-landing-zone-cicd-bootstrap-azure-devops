@@ -27,7 +27,7 @@ resource "azuredevops_branch_policy_min_reviewers" "this" {
   depends_on = [azuredevops_git_repository_file.this]
   project_id = local.azure_devops_project_id
 
-  enabled  = length(var.approvers) > 1
+  enabled  = local.has_approvers
   blocking = true
 
   settings {
@@ -91,7 +91,7 @@ resource "azuredevops_branch_policy_min_reviewers" "template" {
   depends_on = [azuredevops_git_repository_file.template]
   project_id = local.azure_devops_project_id
 
-  enabled  = length(var.approvers) > 1
+  enabled  = local.has_approvers
   blocking = true
 
   settings {

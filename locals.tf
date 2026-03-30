@@ -27,6 +27,9 @@ locals {
   effective_template_repo_name   = var.template_repository_name != null ? var.template_repository_name : azuredevops_git_repository.template[0].name
   effective_ci_template_path     = coalesce(var.ci_template_path, "ci-template.yaml")
   effective_cd_template_path     = coalesce(var.cd_template_path, "cd-template.yaml")
+  create_approval_group          = var.approvers_group_origin_id == null && length(var.approvers) > 0
+  effective_approvers_origin_id  = var.approvers_group_origin_id != null ? var.approvers_group_origin_id : (local.create_approval_group ? azuredevops_group.this[0].origin_id : null)
+  has_approvers                  = var.approvers_group_origin_id != null || length(var.approvers) > 0
 }
 
 locals {
