@@ -1,93 +1,56 @@
 variable "location" {
   type        = string
-  description = "Azure region where the resource should be deployed."
+  description = "The location/region where the resources will be created. Must be in the short form (e.g. 'uksouth')"
   nullable    = false
-}
-
-variable "name" {
-  type        = string
-  description = "The name of the this resource."
-
   validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
+    condition     = can(regex("^[a-z0-9-]+$", var.location))
+    error_message = "The location must only contain lowercase letters, numbers, and hyphens"
+  }
+  validation {
+    condition     = length(var.location) <= 20
+    error_message = "The location must be 20 characters or less"
   }
 }
 
-# This is required for most resource modules
-variable "resource_group_name" {
+variable "organization_name" {
   type        = string
-  description = "The resource group where the resources will be deployed."
+  description = "The name of the Azure DevOps organization."
 }
 
-# required AVM interfaces
-# remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
-variable "customer_managed_key" {
-  type = object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
-  default     = null
-  description = <<DESCRIPTION
-A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
-DESCRIPTION
+variable "personal_access_token" {
+  type        = string
+  description = "The personal access token for the Azure DevOps organization."
+  sensitive   = true
 }
 
-variable "diagnostic_settings" {
-  type = map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
-  }))
+variable "address_space" {
+  type        = string
+  description = "The virtual network address space."
+  default     = "10.0.0.0/24"
+}
+
+variable "agent_use_availability_zones" {
+  type        = bool
+  default     = false
+  description = "Use availability zones for the agent pool if using container instances. This is off by default due to faults in various regions at time of authoring."
+}
+
+variable "approvers" {
+  type        = map(string)
+  description = "A map of approvers for the production environment. The key is the approver name and the value is the user principal name."
   default     = {}
-  description = <<DESCRIPTION
-A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+}
 
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
-DESCRIPTION
-  nullable    = false
+variable "azure_devops_create_project" {
+  type        = bool
+  description = "Whether to create a new Azure DevOps project or use an existing one."
+  default     = true
+}
 
-  validation {
-    condition     = alltrue([for _, v in var.diagnostic_settings : contains(["Dedicated", "AzureDiagnostics"], v.log_analytics_destination_type)])
-    error_message = "Log analytics destination type must be one of: 'Dedicated', 'AzureDiagnostics'."
-  }
-  validation {
-    condition = alltrue(
-      [
-        for _, v in var.diagnostic_settings :
-        v.workspace_resource_id != null || v.storage_account_resource_id != null || v.event_hub_authorization_rule_resource_id != null || v.marketplace_partner_resource_id != null
-      ]
-    )
-    error_message = "At least one of `workspace_resource_id`, `storage_account_resource_id`, `marketplace_partner_resource_id`, or `event_hub_authorization_rule_resource_id`, must be set."
-  }
+variable "azure_devops_project" {
+  type        = string
+  description = "The name of the existing Azure DevOps project. Required if azure_devops_create_project is false."
+  default     = null
 }
 
 variable "enable_telemetry" {
@@ -101,132 +64,153 @@ DESCRIPTION
   nullable    = false
 }
 
-variable "lock" {
-  type = object({
-    kind = string
-    name = optional(string, null)
-  })
-  default     = null
-  description = <<DESCRIPTION
-Controls the Resource Lock configuration for this resource. The following properties can be specified:
-
-- `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
-- `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
-DESCRIPTION
-
-  validation {
-    condition     = var.lock != null ? contains(["CanNotDelete", "ReadOnly"], var.lock.kind) : true
-    error_message = "The lock level must be one of: 'None', 'CanNotDelete', or 'ReadOnly'."
+variable "environments" {
+  type = map(object({
+    display_order                                = number
+    display_name                                 = string
+    has_approval                                 = optional(bool, false)
+    dependent_environment                        = optional(string, "")
+    resource_group_create                        = optional(bool, true)
+    resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
+    user_assigned_managed_identity_name_template = optional(string, "uami-$${workload}-$${environment}-$${type}-$${location}-$${sequence}")
+  }))
+  description = "A map of environments to create. Each environment has a display order, display name, optional approval settings, and optional resource group and managed identity naming templates."
+  default = {
+    dev = {
+      display_order = 1
+      display_name  = "Development"
+    }
+    test = {
+      display_order         = 2
+      display_name          = "Test"
+      dependent_environment = "dev"
+    }
+    prod = {
+      display_order         = 3
+      display_name          = "Production"
+      has_approval          = true
+      dependent_environment = "test"
+    }
   }
 }
 
-# tflint-ignore: terraform_unused_declarations
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = <<DESCRIPTION
-Controls the Managed Identity configuration on this resource. The following properties can be specified:
-
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-DESCRIPTION
-  nullable    = false
+variable "example_module_path" {
+  type        = string
+  description = "The relative path to the example module to seed into the created repository."
+  default     = null
 }
 
-variable "private_endpoints" {
-  type = map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
-    }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-DESCRIPTION
-  nullable    = false
+variable "organization_name_prefix" {
+  type        = string
+  description = "The prefix for the Azure DevOps organization URL."
+  default     = "https://dev.azure.com"
 }
 
-# This variable is used to determine if the private_dns_zone_group block should be included,
-# or if it is to be managed externally, e.g. using Azure Policy.
-# https://github.com/Azure/terraform-azurerm-avm-res-keyvault-vault/issues/32
-# Alternatively you can use AzAPI, which does not have this issue.
-variable "private_endpoints_manage_dns_zone_group" {
-  type        = bool
-  default     = true
-  description = "Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy."
-  nullable    = false
+variable "repository_postfix" {
+  type        = string
+  description = "The postfix for the main repository name."
+  default     = "demo"
 }
 
-variable "role_assignments" {
-  type = map(object({
-    role_definition_id_or_name             = string
-    principal_id                           = string
-    description                            = optional(string, null)
-    skip_service_principal_aad_check       = optional(bool, false)
-    condition                              = optional(string, null)
-    condition_version                      = optional(string, null)
-    delegated_managed_identity_resource_id = optional(string, null)
-    principal_type                         = optional(string, null)
-  }))
-  default     = {}
-  description = <<DESCRIPTION
-A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+variable "repository_postfix_template" {
+  type        = string
+  description = "The postfix for the template repository name."
+  default     = "demo-template"
+}
 
-- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
-- `principal_id` - The ID of the principal to assign the role to.
-- `description` - The description of the role assignment.
-- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
-- `condition` - The condition which will be used to scope the role assignment.
-- `condition_version` - The version of the condition syntax. Valid values are '2.0'.
-- `delegated_managed_identity_resource_id` - The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created.
-- `principal_type` - The type of the principal_id. Possible values are `User`, `Group` and `ServicePrincipal`. Changing this forces a new resource to be created. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
+variable "resource_name_environment" {
+  type        = string
+  description = "The name segment for the environment."
+  default     = "mgt"
+  validation {
+    condition     = can(regex("^[a-z0-9]+$", var.resource_name_environment))
+    error_message = "The name segment for the environment must only contain lowercase letters and numbers"
+  }
+  validation {
+    condition     = length(var.resource_name_environment) <= 4
+    error_message = "The name segment for the environment must be 4 characters or less"
+  }
+}
 
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
-DESCRIPTION
-  nullable    = false
+variable "resource_name_location_short" {
+  type        = string
+  description = "The short name segment for the location."
+  default     = ""
+  validation {
+    condition     = length(var.resource_name_location_short) == 0 || can(regex("^[a-z]+$", var.resource_name_location_short))
+    error_message = "The short name segment for the location must only contain lowercase letters"
+  }
+  validation {
+    condition     = length(var.resource_name_location_short) <= 3
+    error_message = "The short name segment for the location must be 3 characters or less"
+  }
+}
+
+variable "resource_name_sequence_start" {
+  type        = number
+  description = "The number to use for the resource names."
+  default     = 1
+  validation {
+    condition     = var.resource_name_sequence_start >= 1 && var.resource_name_sequence_start <= 999
+    error_message = "The number must be between 1 and 999"
+  }
+}
+
+variable "resource_name_templates" {
+  type        = map(string)
+  description = "A map of resource name templates to use for naming resources."
+  default = {
+    resource_group_state_name             = "rg-$${workload}-state-$${environment}-$${location}-$${sequence}"
+    resource_group_agents_name            = "rg-$${workload}-agents-$${environment}-$${location}-$${sequence}"
+    resource_group_identity_name          = "rg-$${workload}-identity-$${environment}-$${location}-$${sequence}"
+    virtual_network_name                  = "vnet-$${workload}-$${environment}-$${location}-$${sequence}"
+    network_security_group_name           = "nsg-$${workload}-$${environment}-$${location}-$${sequence}"
+    nat_gateway_name                      = "nat-$${workload}-$${environment}-$${location}-$${sequence}"
+    nat_gateway_public_ip_name            = "pip-nat-$${workload}-$${environment}-$${location}-$${sequence}"
+    storage_account_name                  = "sto$${workload}$${environment}$${location_short}$${sequence}$${uniqueness}"
+    storage_account_private_endpoint_name = "pe-sto-$${workload}-$${environment}-$${location}-$${sequence}"
+    agent_compute_postfix_name            = "$${workload}-$${environment}-$${location_short}-$${sequence}"
+    container_instance_prefix_name        = "aci-$${workload}-$${environment}-$${location}"
+    container_registry_name               = "acr$${workload}$${environment}$${location_short}$${sequence}$${uniqueness}"
+    project_name                          = "$${workload}-$${environment}"
+    repository_main_name                  = "$${workload}-$${environment}-main"
+    repository_template_name              = "$${workload}-$${environment}-template"
+    agent_pool_name                       = "agent-pool-$${workload}-$${environment}"
+    group_name                            = "group-$${workload}-$${environment}-approvers"
+  }
+}
+
+variable "resource_name_workload" {
+  type        = string
+  description = "The name segment for the workload."
+  default     = "dema"
+  validation {
+    condition     = can(regex("^[a-z0-9]+$", var.resource_name_workload))
+    error_message = "The name segment for the workload must only contain lowercase letters and numbers"
+  }
+  validation {
+    condition     = length(var.resource_name_workload) <= 4
+    error_message = "The name segment for the workload must be 4 characters or less"
+  }
+}
+
+variable "self_hosted_agent_type" {
+  type        = string
+  description = "The type of self-hosted agent to use. Must be either 'azure_container_app' or 'azure_container_instance'."
+  default     = "azure_container_instance"
+  validation {
+    condition     = contains(["azure_container_app", "azure_container_instance"], var.self_hosted_agent_type)
+    error_message = "self_hosted_agent_type must be either 'azure_container_app' or 'azure_container_instance'."
+  }
+}
+
+variable "subnets_and_sizes" {
+  type        = map(number)
+  description = "The size of the subnets."
+  default = {
+    agents            = 27
+    private_endpoints = 29
+  }
 }
 
 # tflint-ignore: terraform_unused_declarations
@@ -234,4 +218,10 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "use_self_hosted_agents" {
+  type        = bool
+  description = "Whether to use self-hosted agents."
+  default     = true
 }

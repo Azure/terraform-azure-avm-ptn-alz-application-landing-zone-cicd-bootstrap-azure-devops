@@ -1,34 +1,54 @@
-# TODO: insert locals here.
+# Calculate resource names
 locals {
-  managed_identities = {
-    system_assigned_user_assigned = (var.managed_identities.system_assigned || length(var.managed_identities.user_assigned_resource_ids) > 0) ? {
-      this = {
-        type                       = var.managed_identities.system_assigned && length(var.managed_identities.user_assigned_resource_ids) > 0 ? "SystemAssigned, UserAssigned" : length(var.managed_identities.user_assigned_resource_ids) > 0 ? "UserAssigned" : "SystemAssigned"
-        user_assigned_resource_ids = var.managed_identities.user_assigned_resource_ids
-      }
-    } : {}
-    system_assigned = var.managed_identities.system_assigned ? {
-      this = {
-        type = "SystemAssigned"
-      }
-    } : {}
-    user_assigned = length(var.managed_identities.user_assigned_resource_ids) > 0 ? {
-      this = {
-        type                       = "UserAssigned"
-        user_assigned_resource_ids = var.managed_identities.user_assigned_resource_ids
-      }
-    } : {}
+  name_replacements = {
+    workload       = var.resource_name_workload
+    environment    = var.resource_name_environment
+    location       = var.location
+    location_short = var.resource_name_location_short == "" ? module.regions.regions_by_name[var.location].geo_code : var.resource_name_location_short
+    uniqueness     = random_string.unique_name.id
+    sequence       = format("%03d", var.resource_name_sequence_start)
   }
-  # Private endpoint application security group associations.
-  # We merge the nested maps from private endpoints and application security group associations into a single map.
-  private_endpoint_application_security_group_associations = { for assoc in flatten([
-    for pe_k, pe_v in var.private_endpoints : [
-      for asg_k, asg_v in pe_v.application_security_group_associations : {
-        asg_key         = asg_k
-        pe_key          = pe_k
-        asg_resource_id = asg_v
-      }
-    ]
-  ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
+
+  resource_names = { for key, value in var.resource_name_templates : key => templatestring(value, local.name_replacements) }
+}
+
+locals {
+  default_audience_name = "api://AzureADTokenExchange"
+  organization_name_url = "${var.organization_name_prefix}/${var.organization_name}"
+}
+
+locals {
+  environments = { for key, value in var.environments : key => {
+    display_order         = value.display_order
+    display_name          = value.display_name
+    has_approval          = value.has_approval
+    dependent_environment = value.dependent_environment
+    resource_group_create = value.resource_group_create
+    resource_group_name = templatestring(value.resource_group_name_template, {
+      workload    = local.name_replacements.workload
+      environment = key
+      location    = local.name_replacements.location
+      sequence    = local.name_replacements.sequence
+    })
+    user_assigned_managed_identity_name_template = value.user_assigned_managed_identity_name_template
+  } }
+  environment_split_type = {
+    plan  = "plan"
+    apply = "apply"
+  }
+  environment_split = { for environment_split in flatten([for env_key, env_value in local.environments : [
+    for split_key, split_value in local.environment_split_type : {
+      composite_key      = "${env_key}-${split_key}"
+      environment        = env_key
+      type               = split_key
+      required_templates = split_key == local.environment_split_type.plan ? ["ci-template.yaml", "cd-template.yaml"] : ["cd-template.yaml"]
+      user_assigned_managed_identity_name = templatestring(env_value.user_assigned_managed_identity_name_template, {
+        workload    = local.name_replacements.workload
+        environment = env_key
+        type        = split_key
+        location    = local.name_replacements.location
+        sequence    = local.name_replacements.sequence
+      })
+    }
+  ]]) : environment_split.composite_key => environment_split }
 }

@@ -6,7 +6,10 @@ terraform {
       source  = "Azure/azapi"
       version = "~> 2.4"
     }
-    # TODO: Ensure all required providers are listed here and the version property includes a constraint on the maximum major version.
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.7"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
@@ -20,4 +23,21 @@ terraform {
       version = "~> 3.5"
     }
   }
+}
+
+provider "azuredevops" {
+  org_service_url       = local.organization_name_url
+  personal_access_token = var.personal_access_token
+}
+
+provider "azurerm" {
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
