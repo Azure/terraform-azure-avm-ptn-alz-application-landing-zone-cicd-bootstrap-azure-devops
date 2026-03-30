@@ -36,27 +36,43 @@ module "resource_group_environments" {
   location = var.location
   name     = each.value.resource_group_name
   role_assignments = {
-    reader = {
-      role_definition_id_or_name = "Reader"
+    plan = {
+      role_definition_id_or_name = each.value.plan_role_definition_id_or_name
       principal_id               = module.user_assigned_managed_identity["${each.key}-plan"].principal_id
     }
-    contributor = {
-      role_definition_id_or_name = "Contributor"
+    apply = {
+      role_definition_id_or_name = each.value.apply_role_definition_id_or_name
       principal_id               = module.user_assigned_managed_identity["${each.key}-apply"].principal_id
     }
   }
 }
 
-resource "azurerm_role_assignment" "environment_plan" {
-  for_each             = local.environments_byo_scope
-  scope                = each.value.resource_id
-  role_definition_name = "Reader"
-  principal_id         = module.user_assigned_managed_identity["${each.key}-plan"].principal_id
+locals {
+  byo_scope_role_assignments = { for ra in flatten([for env_key, env_value in local.environments_byo_scope : [
+    {
+      key                        = "${env_key}-plan"
+      scope                      = env_value.resource_id
+      role_definition_id_or_name = env_value.plan_role_definition_id_or_name
+      principal_id               = module.user_assigned_managed_identity["${env_key}-plan"].principal_id
+    },
+    {
+      key                        = "${env_key}-apply"
+      scope                      = env_value.resource_id
+      role_definition_id_or_name = env_value.apply_role_definition_id_or_name
+      principal_id               = module.user_assigned_managed_identity["${env_key}-apply"].principal_id
+    },
+  ]]) : ra.key => ra }
 }
 
-resource "azurerm_role_assignment" "environment_apply" {
-  for_each             = local.environments_byo_scope
-  scope                = each.value.resource_id
-  role_definition_name = "Contributor"
-  principal_id         = module.user_assigned_managed_identity["${each.key}-apply"].principal_id
+resource "azapi_resource" "role_assignment" {
+  for_each  = local.byo_scope_role_assignments
+  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  name      = uuidv5("url", "${each.value.scope}-${each.value.principal_id}-${each.value.role_definition_id_or_name}")
+  parent_id = each.value.scope
+  body = {
+    properties = {
+      principalId      = each.value.principal_id
+      roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "${each.value.scope}/providers/Microsoft.Authorization/roleDefinitions/${each.value.role_definition_id_or_name}"
+    }
+  }
 }

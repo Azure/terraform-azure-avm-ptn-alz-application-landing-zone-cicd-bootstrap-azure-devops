@@ -7,9 +7,9 @@ resource "azuredevops_serviceendpoint_azurerm" "this" {
   credentials {
     serviceprincipalid = module.user_assigned_managed_identity[each.key].client_id
   }
-  azurerm_spn_tenantid      = data.azurerm_client_config.current.tenant_id
+  azurerm_spn_tenantid      = data.azapi_client_config.current.tenant_id
   azurerm_subscription_id   = local.environments[each.value.environment].subscription_id
-  azurerm_subscription_name = data.azurerm_subscription.current.display_name
+  azurerm_subscription_name = data.azapi_resource_action.current_subscription.output.displayName
 }
 
 locals {

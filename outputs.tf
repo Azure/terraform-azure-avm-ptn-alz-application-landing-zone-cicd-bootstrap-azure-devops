@@ -5,15 +5,15 @@ output "managed_identity_client_ids" {
 
 output "subscription_id" {
   description = "The subscription ID of the current Azure subscription."
-  value       = data.azurerm_client_config.current.subscription_id
+  value       = data.azapi_client_config.current.subscription_id
 }
 
 output "subscription_name" {
   description = "The display name of the current Azure subscription."
-  value       = data.azurerm_subscription.current.display_name
+  value       = data.azapi_resource_action.current_subscription.output.displayName
 }
 
 output "tenant_id" {
   description = "The tenant ID of the current Azure subscription."
-  value       = data.azurerm_client_config.current.tenant_id
+  value       = data.azapi_client_config.current.tenant_id
 }
