@@ -19,8 +19,19 @@ variable "organization_name" {
 
 variable "personal_access_token" {
   type        = string
-  description = "The personal access token for the Azure DevOps organization."
+  default     = null
+  description = "The personal access token for the Azure DevOps organization. Required for the Azure DevOps provider if not set via the AZDO_PERSONAL_ACCESS_TOKEN environment variable. Also required for agent authentication when `agent_authentication_method` is 'pat'."
   sensitive   = true
+}
+
+variable "agent_authentication_method" {
+  type        = string
+  default     = "uami"
+  description = "The authentication method for self-hosted agents. Possible values are 'pat' or 'uami'. UAMI (User Assigned Managed Identity) does not require a PAT for agent authentication."
+  validation {
+    condition     = contains(["pat", "uami"], var.agent_authentication_method)
+    error_message = "agent_authentication_method must be 'pat' or 'uami'."
+  }
 }
 
 variable "pipeline_folder_path" {
