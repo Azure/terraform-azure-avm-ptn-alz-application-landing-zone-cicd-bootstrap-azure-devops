@@ -11,5 +11,4 @@ locals {
     local.create_template_repository ? azuredevops_git_repository.template[0].name : ""
   )
   has_approvers         = var.azuredevops_existing_approvers_group_origin_id != null || length(var.approvers) > 0
-  organization_name_url = "${var.azuredevops_organization_url_prefix}/${var.azuredevops_organization_name}"
 }

@@ -1,8 +1,3 @@
-variable "azuredevops_organization_name" {
-  type        = string
-  description = "The name of the Azure DevOps organization."
-}
-
 variable "location" {
   type        = string
   description = "The location/region where the resources will be created. Must be in the short form (e.g. 'uksouth')"
@@ -21,14 +16,8 @@ variable "location" {
 variable "agent_personal_access_token" {
   type        = string
   default     = null
-  description = "The personal access token for the Azure DevOps organization. Required for the Azure DevOps provider if not set via the AZDO_PERSONAL_ACCESS_TOKEN environment variable. Also required for agent authentication when `agent_authentication_method` is 'pat'."
+  description = "The personal access token for the Azure DevOps organization. Required for agent authentication when `agent_authentication_method` is 'pat'. Provider auth should be configured via the AZDO_PERSONAL_ACCESS_TOKEN environment variable."
   sensitive   = true
-}
-
-variable "azuredevops_organization_url_prefix" {
-  type        = string
-  default     = "https://dev.azure.com"
-  description = "The prefix for the Azure DevOps organization URL."
 }
 
 variable "enable_telemetry" {

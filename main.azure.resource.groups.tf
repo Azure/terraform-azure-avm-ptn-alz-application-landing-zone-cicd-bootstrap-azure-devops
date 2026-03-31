@@ -70,7 +70,7 @@ resource "azapi_resource" "role_assignment" {
   body = {
     properties = {
       principalId      = each.value.principal_id
-      roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "${each.value.scope}/providers/Microsoft.Authorization/roleDefinitions/${each.value.role_definition_id_or_name}"
+      roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : module.role_definitions.role_definition_rolename_to_resource_id[each.value.role_definition_id_or_name]
     }
   }
   create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null

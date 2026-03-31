@@ -5,7 +5,7 @@ module "azure_devops_agents" {
 
   location                                      = var.location
   postfix                                       = local.resource_names.agent_compute_postfix_name
-  version_control_system_organization           = local.organization_name_url
+  version_control_system_organization           = data.azuredevops_client_config.current.organization_url
   version_control_system_type                   = "azuredevops"
   compute_types                                 = [var.agent_compute_type]
   container_app_subnet_id                       = local.effective_agents_subnet_id

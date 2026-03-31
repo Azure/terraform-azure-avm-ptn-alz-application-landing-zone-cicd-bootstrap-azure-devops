@@ -1,8 +1,3 @@
-variable "azuredevops_organization_name" {
-  type        = string
-  description = "The name of the Azure DevOps organization."
-}
-
 variable "enable_telemetry" {
   type        = bool
   default     = true

@@ -39,7 +39,7 @@ resource "azuredevops_check_exclusive_lock" "service_connection" {
 }
 
 resource "azuredevops_check_required_template" "this" {
-  for_each             = local.environment_split
+  for_each             = { for k, v in local.environment_split : k => v if length(v.required_templates) > 0 }
   project_id           = local.azure_devops_project_id
   target_resource_id   = azuredevops_serviceendpoint_azurerm.this[each.key].id
   target_resource_type = "endpoint"

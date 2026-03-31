@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.7"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -21,15 +21,24 @@ terraform {
   }
 }
 
+provider "azuredevops" {}
+
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
 
 # ACI with private networking and Terraform pipelines
 module "test" {
   source = "../../"
 
-  azuredevops_organization_name = var.azuredevops_organization_name
   location                      = var.location
   agent_use_self_hosted         = true
   compute_type                  = "azure_container_instance"

@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.7"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -21,15 +21,24 @@ terraform {
   }
 }
 
+provider "azuredevops" {}
+
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
 
 # BYO agent pool with Terraform pipelines (no self-hosted infra created)
 module "test" {
   source = "../../"
 
-  azuredevops_organization_name = var.azuredevops_organization_name
   location                      = var.location
   agent_existing_pool_name      = "my-existing-agent-pool"
   enable_telemetry              = var.enable_telemetry

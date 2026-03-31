@@ -4,11 +4,11 @@ terraform {
   required_providers {
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.4"
+      version = "~> 2.9"
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.7"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -25,8 +25,18 @@ terraform {
   }
 }
 
+provider "azuredevops" {}
+
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
 
 data "azapi_client_config" "current" {}
@@ -35,7 +45,6 @@ data "azapi_client_config" "current" {}
 module "test" {
   source = "../../"
 
-  azuredevops_organization_name          = var.azuredevops_organization_name
   location                               = var.location
   agent_use_self_hosted                  = false
   azuredevops_create_template_repository = false
