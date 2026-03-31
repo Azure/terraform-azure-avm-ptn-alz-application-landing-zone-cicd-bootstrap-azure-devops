@@ -48,6 +48,7 @@ module "test" {
     dev = {
       display_order = 1
       display_name  = "Development"
+      scope         = "subscription"
       identities = {
         read = { enabled = false }
       }
