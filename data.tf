@@ -1,10 +1,15 @@
 data "azapi_client_config" "current" {}
 
-data "azapi_resource_action" "current_subscription" {
-  type        = "Microsoft.Resources/subscriptions@2022-12-01"
-  resource_id = "/subscriptions/${data.azapi_client_config.current.subscription_id}"
-  action      = ""
-  method      = "GET"
+locals {
+  environment_subscription_ids = toset([for env in local.environments : env.subscription_id])
+}
+
+data "azapi_resource_action" "subscription" {
+  for_each               = local.environment_subscription_ids
+  action                 = ""
+  method                 = "GET"
+  resource_id            = "/subscriptions/${each.value}"
+  type                   = "Microsoft.Resources/subscriptions@2022-12-01"
   response_export_values = ["displayName"]
 }
 

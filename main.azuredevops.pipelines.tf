@@ -16,7 +16,6 @@ locals {
       pipeline      = pipeline_key
     }
   ]]) : environment_split.composite_key => environment_split }
-
   pipelines_by_service_connection = { for environment_split in flatten([for env_key, env_value in local.environment_split : [
     for pipeline_key, pipeline_value in local.pipelines : {
       composite_key      = "${env_key}-${pipeline_key}"

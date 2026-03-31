@@ -1,18 +1,16 @@
 # --- Project ---
 
+# --- Repositories ---
+
+# --- Deployment Mode ---
+
+# --- Pipeline Templates ---
+
 variable "azuredevops_create_project" {
   type        = bool
-  description = "Whether to create a new Azure DevOps project or use an existing one."
   default     = true
+  description = "Whether to create a new Azure DevOps project or use an existing one."
 }
-
-variable "azuredevops_project_name" {
-  type        = string
-  description = "The name of the existing Azure DevOps project. Required if `create_project` is false."
-  default     = null
-}
-
-# --- Repositories ---
 
 variable "azuredevops_existing_template_repository_name" {
   type        = string
@@ -20,22 +18,32 @@ variable "azuredevops_existing_template_repository_name" {
   description = "The name of a pre-existing template repository containing CI/CD pipeline templates (BYO mode). When set, the module will not create a template repository or push template files."
 }
 
-variable "example_module_path" {
+variable "azuredevops_pipeline_folder_path" {
   type        = string
-  description = "The relative path to the example module to seed into the created repository."
   default     = null
+  description = "The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
 }
 
-# --- Deployment Mode ---
+variable "azuredevops_pipelines" {
+  type = map(object({
+    main_file     = string
+    template_path = string
+  }))
+  default     = null
+  description = <<DESCRIPTION
+A map of pipelines to create in the main repository. Each key is the pipeline name, and the value specifies:
+- `main_file` - The source YAML file name within the pipeline folder's main/ directory.
+- `template_path` - The path to the template within the template repository.
+When null, defaults based on deployment_mode:
+  terraform: { ci = { main_file = "ci.yaml", template_path = "ci-template.yaml" }, cd = { main_file = "cd.yaml", template_path = "cd-template.yaml" } }
+  bicep: same structure
+DESCRIPTION
+}
 
-variable "deployment_mode" {
+variable "azuredevops_project_name" {
   type        = string
-  default     = "terraform"
-  description = "The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state."
-  validation {
-    condition     = contains(["terraform", "bicep", "other"], var.deployment_mode)
-    error_message = "deployment_mode must be 'terraform', 'bicep', or 'other'."
-  }
+  default     = null
+  description = "The name of the existing Azure DevOps project. Required if `create_project` is false."
 }
 
 variable "bicep_deployments" {
@@ -61,26 +69,19 @@ A list of Bicep deployment stack configurations. Each deployment specifies a tem
 DESCRIPTION
 }
 
-# --- Pipeline Templates ---
-
-variable "azuredevops_pipeline_folder_path" {
+variable "deployment_mode" {
   type        = string
-  default     = null
-  description = "The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
+  default     = "terraform"
+  description = "The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state."
+
+  validation {
+    condition     = contains(["terraform", "bicep", "other"], var.deployment_mode)
+    error_message = "deployment_mode must be 'terraform', 'bicep', or 'other'."
+  }
 }
 
-variable "azuredevops_pipelines" {
-  type = map(object({
-    main_file     = string
-    template_path = string
-  }))
+variable "example_module_path" {
+  type        = string
   default     = null
-  description = <<DESCRIPTION
-A map of pipelines to create in the main repository. Each key is the pipeline name, and the value specifies:
-- `main_file` - The source YAML file name within the pipeline folder's main/ directory.
-- `template_path` - The path to the template within the template repository.
-When null, defaults based on deployment_mode:
-  terraform: { ci = { main_file = "ci.yaml", template_path = "ci-template.yaml" }, cd = { main_file = "cd.yaml", template_path = "cd-template.yaml" } }
-  bicep: same structure
-DESCRIPTION
+  description = "The relative path to the example module to seed into the created repository."
 }

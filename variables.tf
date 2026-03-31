@@ -1,7 +1,13 @@
+variable "azuredevops_organization_name" {
+  type        = string
+  description = "The name of the Azure DevOps organization."
+}
+
 variable "location" {
   type        = string
   description = "The location/region where the resources will be created. Must be in the short form (e.g. 'uksouth')"
   nullable    = false
+
   validation {
     condition     = can(regex("^[a-z0-9-]+$", var.location))
     error_message = "The location must only contain lowercase letters, numbers, and hyphens"
@@ -12,22 +18,17 @@ variable "location" {
   }
 }
 
-variable "azuredevops_organization_name" {
-  type        = string
-  description = "The name of the Azure DevOps organization."
-}
-
-variable "azuredevops_organization_url_prefix" {
-  type        = string
-  description = "The prefix for the Azure DevOps organization URL."
-  default     = "https://dev.azure.com"
-}
-
 variable "agent_personal_access_token" {
   type        = string
   default     = null
   description = "The personal access token for the Azure DevOps organization. Required for the Azure DevOps provider if not set via the AZDO_PERSONAL_ACCESS_TOKEN environment variable. Also required for agent authentication when `agent_authentication_method` is 'pat'."
   sensitive   = true
+}
+
+variable "azuredevops_organization_url_prefix" {
+  type        = string
+  default     = "https://dev.azure.com"
+  description = "The prefix for the Azure DevOps organization URL."
 }
 
 variable "enable_telemetry" {

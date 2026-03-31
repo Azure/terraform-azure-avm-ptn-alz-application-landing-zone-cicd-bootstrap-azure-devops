@@ -9,7 +9,7 @@ resource "azuredevops_serviceendpoint_azurerm" "this" {
   }
   azurerm_spn_tenantid      = data.azapi_client_config.current.tenant_id
   azurerm_subscription_id   = local.environments[each.value.environment].subscription_id
-  azurerm_subscription_name = data.azapi_resource_action.current_subscription.output.displayName
+  azurerm_subscription_name = data.azapi_resource_action.subscription[local.environments[each.value.environment].subscription_id].output.displayName
 }
 
 locals {

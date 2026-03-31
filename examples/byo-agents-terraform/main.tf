@@ -29,9 +29,9 @@ provider "azurerm" {
 module "test" {
   source = "../../"
 
-  location            = var.location
-  azuredevops_organization_name   = var.azuredevops_organization_name
-  enable_telemetry    = var.enable_telemetry
-  example_module_path = "examples/example-module-terraform"
-  agent_existing_pool_name = "my-existing-agent-pool"
+  azuredevops_organization_name = var.azuredevops_organization_name
+  location                      = var.location
+  agent_existing_pool_name      = "my-existing-agent-pool"
+  enable_telemetry              = var.enable_telemetry
+  example_module_path           = "examples/example-module-terraform"
 }

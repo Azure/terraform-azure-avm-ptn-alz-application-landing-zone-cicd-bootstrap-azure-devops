@@ -9,6 +9,6 @@ resource "azuredevops_project" "this" {
 }
 
 locals {
-  azure_devops_project_name = var.azuredevops_create_project ? azuredevops_project.this[0].name : data.azuredevops_project.this[0].name
   azure_devops_project_id   = var.azuredevops_create_project ? azuredevops_project.this[0].id : data.azuredevops_project.this[0].id
+  azure_devops_project_name = var.azuredevops_create_project ? azuredevops_project.this[0].name : data.azuredevops_project.this[0].name
 }

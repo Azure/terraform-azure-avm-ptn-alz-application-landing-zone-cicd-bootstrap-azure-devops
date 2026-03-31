@@ -1,4 +1,6 @@
 locals {
+  environments_byo_scope = { for env_key, env_value in local.environments : env_key => env_value if !env_value.create_resource_group }
+  environments_create_rg = { for env_key, env_value in local.environments : env_key => env_value if env_value.create_resource_group }
   resource_groups = merge(
     var.deployment_mode == "terraform" ? {
       state = {
@@ -16,15 +18,13 @@ locals {
       }
     } : {},
   )
-
-  environments_create_rg = { for env_key, env_value in local.environments : env_key => env_value if env_value.create_resource_group }
-  environments_byo_scope = { for env_key, env_value in local.environments : env_key => env_value if !env_value.create_resource_group }
 }
 
 module "resource_group" {
   source   = "Azure/avm-res-resources-resourcegroup/azurerm"
   version  = "0.2.2"
   for_each = local.resource_groups
+
   location = var.location
   name     = each.value.name
 }
@@ -33,6 +33,7 @@ module "resource_group_environments" {
   source   = "Azure/avm-res-resources-resourcegroup/azurerm"
   version  = "0.2.2"
   for_each = local.environments_create_rg
+
   location = var.location
   name     = each.value.resource_group_name
   role_assignments = { for ra in flatten([for identity_key in ["read", "write"] : [
@@ -41,7 +42,7 @@ module "resource_group_environments" {
       role         = ra_value.role_definition_id_or_name
       principal_id = module.user_assigned_managed_identity["${each.key}-${identity_key}"].principal_id
     }
-  ] if each.value.identities[identity_key].enabled]) : ra.key => {
+    ] if each.value.identities[identity_key].enabled]) : ra.key => {
     role_definition_id_or_name = ra.role
     principal_id               = ra.principal_id
   } }
@@ -61,14 +62,19 @@ locals {
 }
 
 resource "azapi_resource" "role_assignment" {
-  for_each  = local.byo_scope_role_assignments
-  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  for_each = local.byo_scope_role_assignments
+
   name      = uuidv5("url", "${each.value.scope}-${each.value.principal_id}-${each.value.role_definition_id_or_name}")
   parent_id = each.value.scope
+  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
   body = {
     properties = {
       principalId      = each.value.principal_id
       roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "${each.value.scope}/providers/Microsoft.Authorization/roleDefinitions/${each.value.role_definition_id_or_name}"
     }
   }
+  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 }

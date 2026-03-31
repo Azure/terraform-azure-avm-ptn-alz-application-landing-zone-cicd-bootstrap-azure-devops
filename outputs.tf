@@ -15,7 +15,7 @@ output "subscription_id" {
 
 output "subscription_name" {
   description = "The subscription display name."
-  value       = data.azapi_resource_action.current_subscription.output.displayName
+  value       = data.azapi_resource_action.subscription[data.azapi_client_config.current.subscription_id].output.displayName
 }
 
 output "tenant_id" {

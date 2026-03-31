@@ -35,21 +35,18 @@ data "azapi_client_config" "current" {}
 module "test" {
   source = "../../"
 
-  location                     = var.location
-  azuredevops_organization_name = var.azuredevops_organization_name
-  deployment_mode              = "other"
-  agent_use_self_hosted        = false
-
+  azuredevops_organization_name                 = var.azuredevops_organization_name
+  location                                      = var.location
+  agent_use_self_hosted                         = false
   azuredevops_existing_template_repository_name = "not-used"
-
-  azuredevops_pipeline_folder_path = "pipelines"
+  azuredevops_pipeline_folder_path              = "pipelines"
   azuredevops_pipelines = {
     info = {
       main_file     = "info.yaml"
       template_path = "info-template.yaml"
     }
   }
-
+  deployment_mode = "other"
   environments = {
     dev = {
       display_order   = 1

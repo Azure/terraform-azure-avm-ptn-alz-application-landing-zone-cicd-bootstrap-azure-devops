@@ -13,6 +13,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
 
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.7)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
@@ -23,15 +25,42 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_management_lock.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/management_lock) (resource)
-- [azurerm_private_endpoint.this_managed_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint.this_unmanaged_dns_zone_groups](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint) (resource)
-- [azurerm_private_endpoint_application_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_endpoint_application_security_group_association) (resource)
-- [azurerm_resource_group.TODO](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
-- [azurerm_role_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
+- [azapi_resource.federated_identity_credential](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.role_assignment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
+- [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
+- [azuredevops_branch_policy_build_validation.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_build_validation) (resource)
+- [azuredevops_branch_policy_merge_types.template](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_merge_types) (resource)
+- [azuredevops_branch_policy_merge_types.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_merge_types) (resource)
+- [azuredevops_branch_policy_min_reviewers.template](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_min_reviewers) (resource)
+- [azuredevops_branch_policy_min_reviewers.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_min_reviewers) (resource)
+- [azuredevops_build_definition.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/build_definition) (resource)
+- [azuredevops_check_approval.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/check_approval) (resource)
+- [azuredevops_check_exclusive_lock.environment](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/check_exclusive_lock) (resource)
+- [azuredevops_check_exclusive_lock.service_connection](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/check_exclusive_lock) (resource)
+- [azuredevops_check_required_template.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/check_required_template) (resource)
+- [azuredevops_environment.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/environment) (resource)
+- [azuredevops_git_repository.template](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository) (resource)
+- [azuredevops_git_repository.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository) (resource)
+- [azuredevops_git_repository_file.template](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository_file) (resource)
+- [azuredevops_git_repository_file.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/git_repository_file) (resource)
+- [azuredevops_group.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/group) (resource)
+- [azuredevops_group_membership.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/group_membership) (resource)
+- [azuredevops_pipeline_authorization.agent_pool](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
+- [azuredevops_pipeline_authorization.environment](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
+- [azuredevops_pipeline_authorization.service_connection](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/pipeline_authorization) (resource)
+- [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/project) (resource)
+- [azuredevops_serviceendpoint_azurerm.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/serviceendpoint_azurerm) (resource)
+- [azuredevops_variable_group.bicep](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/variable_group) (resource)
+- [azuredevops_variable_group.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/variable_group) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
+- [random_string.unique_name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azapi_resource_action.subscription](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
+- [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/project) (data source)
+- [azuredevops_users.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/users) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -39,21 +68,15 @@ The following resources are used by this module:
 
 The following input variables are required:
 
+### <a name="input_azuredevops_organization_name"></a> [azuredevops\_organization\_name](#input\_azuredevops\_organization\_name)
+
+Description: The name of the Azure DevOps organization.
+
+Type: `string`
+
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: Azure region where the resource should be deployed.
-
-Type: `string`
-
-### <a name="input_name"></a> [name](#input\_name)
-
-Description: The name of the this resource.
-
-Type: `string`
-
-### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
-
-Description: The resource group where the resources will be deployed.
+Description: The location/region where the resources will be created. Must be in the short form (e.g. 'uksouth')
 
 Type: `string`
 
@@ -61,63 +84,219 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
-### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
+### <a name="input_agent_authentication_method"></a> [agent\_authentication\_method](#input\_agent\_authentication\_method)
 
-Description: A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
+Description: The authentication method for self-hosted agents. Possible values are 'pat' or 'uami'. UAMI (User Assigned Managed Identity) does not require a PAT for agent authentication.
 
-Type:
+Type: `string`
 
-```hcl
-object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
-```
+Default: `"uami"`
+
+### <a name="input_agent_compute_type"></a> [agent\_compute\_type](#input\_agent\_compute\_type)
+
+Description: The type of Azure compute to use for self-hosted agents. Must be either 'azure\_container\_app' or 'azure\_container\_instance'.
+
+Type: `string`
+
+Default: `"azure_container_instance"`
+
+### <a name="input_agent_compute_use_availability_zones"></a> [agent\_compute\_use\_availability\_zones](#input\_agent\_compute\_use\_availability\_zones)
+
+Description: Use availability zones for the compute instances. This is off by default due to faults in various regions at time of authoring.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_agent_existing_pool_name"></a> [agent\_existing\_pool\_name](#input\_agent\_existing\_pool\_name)
+
+Description: The name of a pre-existing Azure DevOps agent pool (BYO mode). When set, the module will not create an agent pool or any Azure compute infrastructure. The provided pool name will be used in pipeline YAML files.
+
+Type: `string`
 
 Default: `null`
 
-### <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings)
+### <a name="input_agent_personal_access_token"></a> [agent\_personal\_access\_token](#input\_agent\_personal\_access\_token)
 
-Description: A map of diagnostic settings to create on the Key Vault. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Description: The personal access token for the Azure DevOps organization. Required for the Azure DevOps provider if not set via the AZDO\_PERSONAL\_ACCESS\_TOKEN environment variable. Also required for agent authentication when `agent_authentication_method` is 'pat'.
 
-- `name` - (Optional) The name of the diagnostic setting. One will be generated if not set, however this will not be unique if you want to create multiple diagnostic setting resources.
-- `log_categories` - (Optional) A set of log categories to send to the log analytics workspace. Defaults to `[]`.
-- `log_groups` - (Optional) A set of log groups to send to the log analytics workspace. Defaults to `["allLogs"]`.
-- `metric_categories` - (Optional) A set of metric categories to send to the log analytics workspace. Defaults to `["AllMetrics"]`.
-- `log_analytics_destination_type` - (Optional) The destination type for the diagnostic setting. Possible values are `Dedicated` and `AzureDiagnostics`. Defaults to `Dedicated`.
-- `workspace_resource_id` - (Optional) The resource ID of the log analytics workspace to send logs and metrics to.
-- `storage_account_resource_id` - (Optional) The resource ID of the storage account to send logs and metrics to.
-- `event_hub_authorization_rule_resource_id` - (Optional) The resource ID of the event hub authorization rule to send logs and metrics to.
-- `event_hub_name` - (Optional) The name of the event hub. If none is specified, the default event hub will be selected.
-- `marketplace_partner_resource_id` - (Optional) The full ARM resource ID of the Marketplace resource to which you would like to send Diagnostic LogsLogs.
+Type: `string`
+
+Default: `null`
+
+### <a name="input_agent_use_self_hosted"></a> [agent\_use\_self\_hosted](#input\_agent\_use\_self\_hosted)
+
+Description: Whether to use self-hosted agents. When false, pipelines use Microsoft-hosted agents.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_approvers"></a> [approvers](#input\_approvers)
+
+Description: A map of approvers for environment approvals. The key is the approver name and the value is the user principal name.
+
+Type: `map(string)`
+
+Default: `{}`
+
+### <a name="input_azure_address_space"></a> [azure\_address\_space](#input\_azure\_address\_space)
+
+Description: The virtual network address space.
+
+Type: `string`
+
+Default: `"10.0.0.0/24"`
+
+### <a name="input_azure_alz_platform_landing_zone_mode_enabled"></a> [azure\_alz\_platform\_landing\_zone\_mode\_enabled](#input\_azure\_alz\_platform\_landing\_zone\_mode\_enabled)
+
+Description: When enabled, the module will not create private DNS zones and will not manage DNS zone groups for private endpoints. This is useful when the platform landing zone is managing DNS zones centrally via Azure Policy.
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_azure_existing_agents_subnet_resource_id"></a> [azure\_existing\_agents\_subnet\_resource\_id](#input\_azure\_existing\_agents\_subnet\_resource\_id)
+
+Description: The resource ID of a pre-existing subnet for agents (BYO mode). The subnet must have the appropriate delegation for the chosen `compute_type`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_existing_private_endpoints_subnet_resource_id"></a> [azure\_existing\_private\_endpoints\_subnet\_resource\_id](#input\_azure\_existing\_private\_endpoints\_subnet\_resource\_id)
+
+Description: The resource ID of a pre-existing subnet for private endpoints (BYO mode).
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_existing_virtual_network_resource_id"></a> [azure\_existing\_virtual\_network\_resource\_id](#input\_azure\_existing\_virtual\_network\_resource\_id)
+
+Description: The resource ID of a pre-existing virtual network (BYO mode). Must be set together with `existing_agents_subnet_resource_id` and `existing_private_endpoints_subnet_resource_id`. When set, the module will not create a virtual network or agents resource group.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_subnets_and_sizes"></a> [azure\_subnets\_and\_sizes](#input\_azure\_subnets\_and\_sizes)
+
+Description: The CIDR prefix sizes for subnets within the virtual network.
+
+Type: `map(number)`
+
+Default:
+
+```json
+{
+  "agents": 27,
+  "private_endpoints": 29
+}
+```
+
+### <a name="input_azuredevops_create_project"></a> [azuredevops\_create\_project](#input\_azuredevops\_create\_project)
+
+Description: Whether to create a new Azure DevOps project or use an existing one.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_azuredevops_existing_approvers_group_origin_id"></a> [azuredevops\_existing\_approvers\_group\_origin\_id](#input\_azuredevops\_existing\_approvers\_group\_origin\_id)
+
+Description: The origin ID of a pre-existing Azure DevOps group to use for approvals (BYO mode). When set, the module will not create an approval group or look up approver users.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azuredevops_existing_template_repository_name"></a> [azuredevops\_existing\_template\_repository\_name](#input\_azuredevops\_existing\_template\_repository\_name)
+
+Description: The name of a pre-existing template repository containing CI/CD pipeline templates (BYO mode). When set, the module will not create a template repository or push template files.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azuredevops_organization_url_prefix"></a> [azuredevops\_organization\_url\_prefix](#input\_azuredevops\_organization\_url\_prefix)
+
+Description: The prefix for the Azure DevOps organization URL.
+
+Type: `string`
+
+Default: `"https://dev.azure.com"`
+
+### <a name="input_azuredevops_pipeline_folder_path"></a> [azuredevops\_pipeline\_folder\_path](#input\_azuredevops\_pipeline\_folder\_path)
+
+Description: The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azuredevops_pipelines"></a> [azuredevops\_pipelines](#input\_azuredevops\_pipelines)
+
+Description: A map of pipelines to create in the main repository. Each key is the pipeline name, and the value specifies:
+- `main_file` - The source YAML file name within the pipeline folder's main/ directory.
+- `template_path` - The path to the template within the template repository.  
+When null, defaults based on deployment\_mode:  
+  terraform: { ci = { main\_file = "ci.yaml", template\_path = "ci-template.yaml" }, cd = { main\_file = "cd.yaml", template\_path = "cd-template.yaml" } }  
+  bicep: same structure
 
 Type:
 
 ```hcl
 map(object({
-    name                                     = optional(string, null)
-    log_categories                           = optional(set(string), [])
-    log_groups                               = optional(set(string), ["allLogs"])
-    metric_categories                        = optional(set(string), ["AllMetrics"])
-    log_analytics_destination_type           = optional(string, "Dedicated")
-    workspace_resource_id                    = optional(string, null)
-    storage_account_resource_id              = optional(string, null)
-    event_hub_authorization_rule_resource_id = optional(string, null)
-    event_hub_name                           = optional(string, null)
-    marketplace_partner_resource_id          = optional(string, null)
+    main_file     = string
+    template_path = string
   }))
 ```
 
-Default: `{}`
+Default: `null`
+
+### <a name="input_azuredevops_project_name"></a> [azuredevops\_project\_name](#input\_azuredevops\_project\_name)
+
+Description: The name of the existing Azure DevOps project. Required if `create_project` is false.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_bicep_deployments"></a> [bicep\_deployments](#input\_bicep\_deployments)
+
+Description: A list of Bicep deployment stack configurations. Each deployment specifies a template file, optional parameters file, and scope.
+- `name` - (Required) The name of the deployment stack.
+- `template_file` - (Required) The relative path to the Bicep template file.
+- `parameters_file` - (Optional) The relative path to the parameters file.
+- `scope` - (Optional) The deployment scope: 'group' (resource group), 'sub' (subscription), or 'mg' (management group). Defaults to 'group'.
+- `resource_group` - (Optional) The resource group name. Required when scope is 'group'.
+- `location` - (Optional) The deployment location. Required when scope is 'sub' or 'mg'.
+- `management_group_id` - (Optional) The management group ID. Required when scope is 'mg'.
+
+Type:
+
+```hcl
+list(object({
+    name                = string
+    template_file       = string
+    parameters_file     = optional(string)
+    scope               = optional(string, "group")
+    resource_group      = optional(string)
+    location            = optional(string)
+    management_group_id = optional(string)
+  }))
+```
+
+Default: `null`
+
+### <a name="input_deployment_mode"></a> [deployment\_mode](#input\_deployment\_mode)
+
+Description: The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state.
+
+Type: `string`
+
+Default: `"terraform"`
 
 ### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
 
@@ -129,137 +308,154 @@ Type: `bool`
 
 Default: `true`
 
-### <a name="input_lock"></a> [lock](#input\_lock)
+### <a name="input_environments"></a> [environments](#input\_environments)
 
-Description: Controls the Resource Lock configuration for this resource. The following properties can be specified:
-
-- `kind` - (Required) The type of lock. Possible values are `\"CanNotDelete\"` and `\"ReadOnly\"`.
-- `name` - (Optional) The name of the lock. If not specified, a name will be generated based on the `kind` value. Changing this forces the creation of a new resource.
+Description: A map of environments to create. Each environment has the following properties:
+- `display_order` - (Required) The order to display the environment.
+- `display_name` - (Required) The display name of the environment.
+- `has_approval` - (Optional) Whether the environment requires approval. Defaults to `false`.
+- `dependent_environment` - (Optional) The environment that this environment depends on.
+- `scope` - (Optional) The deployment scope: 'resource\_group', 'subscription', or 'management\_group'. Defaults to 'resource\_group'.
+- `subscription_id` - (Optional) The subscription ID for the environment. Defaults to the current subscription.
+- `resource_id` - (Optional) The resource ID of the target scope.
+- `resource_group_name` - (Optional) Explicit resource group name. When null, generated from `resource_group_env_name` template in `resource_name_templates`.
+- `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource\_group' and resource\_id is not set.
+- `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
+  - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
+  - `name` - (Optional) Explicit identity name. When null, generated from `identity_read_name` or `identity_write_name` template in `resource_name_templates`.
+  - `allowed_template_keys` - (Optional) Pipeline keys this identity is allowed to use for service connection checks. When null, read gets all pipelines, write gets only 'cd'.
+  - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
 
 Type:
 
 ```hcl
-object({
-    kind = string
-    name = optional(string, null)
-  })
+map(object({
+    display_order         = number
+    display_name          = string
+    has_approval          = optional(bool, false)
+    dependent_environment = optional(string, "")
+    scope                 = optional(string, "resource_group")
+    subscription_id       = optional(string)
+    resource_id           = optional(string)
+    resource_group_name   = optional(string)
+    resource_group_create = optional(bool, true)
+    identities = optional(object({
+      read = optional(object({
+        enabled               = optional(bool, true)
+        name                  = optional(string)
+        allowed_template_keys = optional(list(string))
+        role_assignments = optional(map(object({
+          role_definition_id_or_name = string
+        })), { default = { role_definition_id_or_name = "Reader" } })
+      }), {})
+      write = optional(object({
+        enabled               = optional(bool, true)
+        name                  = optional(string)
+        allowed_template_keys = optional(list(string))
+        role_assignments = optional(map(object({
+          role_definition_id_or_name = string
+        })), { default = { role_definition_id_or_name = "Contributor" } })
+      }), {})
+    }), {})
+  }))
 ```
+
+Default:
+
+```json
+{
+  "dev": {
+    "display_name": "Development",
+    "display_order": 1
+  },
+  "prod": {
+    "dependent_environment": "test",
+    "display_name": "Production",
+    "display_order": 3,
+    "has_approval": true
+  },
+  "test": {
+    "dependent_environment": "dev",
+    "display_name": "Test",
+    "display_order": 2
+  }
+}
+```
+
+### <a name="input_example_module_path"></a> [example\_module\_path](#input\_example\_module\_path)
+
+Description: The relative path to the example module to seed into the created repository.
+
+Type: `string`
 
 Default: `null`
 
-### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
+### <a name="input_resource_name_environment"></a> [resource\_name\_environment](#input\_resource\_name\_environment)
 
-Description: Controls the Managed Identity configuration on this resource. The following properties can be specified:
+Description: The name segment for the management environment (used for naming Azure infrastructure resources, not deployment environments).
 
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
+Type: `string`
 
-Type:
+Default: `"mgt"`
 
-```hcl
-object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
+### <a name="input_resource_name_location_short"></a> [resource\_name\_location\_short](#input\_resource\_name\_location\_short)
+
+Description: The short name segment for the location. When empty, auto-derived from the region geo code.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_resource_name_sequence_start"></a> [resource\_name\_sequence\_start](#input\_resource\_name\_sequence\_start)
+
+Description: The sequence number to use for resource names.
+
+Type: `number`
+
+Default: `1`
+
+### <a name="input_resource_name_templates"></a> [resource\_name\_templates](#input\_resource\_name\_templates)
+
+Description: A map of resource name templates. Each template supports placeholders: ${workload}, ${environment}, ${location}, ${location\_short}, ${sequence}, ${uniqueness}.
+
+Type: `map(string)`
+
+Default:
+
+```json
+{
+  "agent_compute_postfix_name": "${workload}-${environment}-${location_short}-${sequence}",
+  "agent_pool_name": "agent-pool-${workload}-${environment}",
+  "container_instance_prefix_name": "aci-${workload}-${environment}-${location}",
+  "container_registry_name": "acr${workload}${environment}${location_short}${sequence}${uniqueness}",
+  "federated_credential_name": "${workload}-${environment}",
+  "group_name": "group-${workload}-${environment}-approvers",
+  "identity_read_name": "uami-${workload}-${environment}-read-${location}-${sequence}",
+  "identity_write_name": "uami-${workload}-${environment}-write-${location}-${sequence}",
+  "nat_gateway_name": "nat-${workload}-${environment}-${location}-${sequence}",
+  "nat_gateway_public_ip_name": "pip-nat-${workload}-${environment}-${location}-${sequence}",
+  "network_security_group_name": "nsg-${workload}-${environment}-${location}-${sequence}",
+  "project_name": "${workload}-${environment}",
+  "repository_main_name": "${workload}-${environment}-main",
+  "repository_template_name": "${workload}-${environment}-template",
+  "resource_group_agents_name": "rg-${workload}-agents-${environment}-${location}-${sequence}",
+  "resource_group_env_name": "rg-${workload}-env-${environment}-${location}-${sequence}",
+  "resource_group_identity_name": "rg-${workload}-identity-${environment}-${location}-${sequence}",
+  "resource_group_state_name": "rg-${workload}-state-${environment}-${location}-${sequence}",
+  "service_connection_name": "service-connection-${workload}-${environment}",
+  "storage_account_name": "sto${workload}${environment}${location_short}${sequence}${uniqueness}",
+  "storage_account_private_endpoint_name": "pe-sto-${workload}-${environment}-${location}-${sequence}",
+  "virtual_network_name": "vnet-${workload}-${environment}-${location}-${sequence}"
+}
 ```
 
-Default: `{}`
+### <a name="input_resource_name_workload"></a> [resource\_name\_workload](#input\_resource\_name\_workload)
 
-### <a name="input_private_endpoints"></a> [private\_endpoints](#input\_private\_endpoints)
+Description: The name segment for the workload.
 
-Description: A map of private endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Type: `string`
 
-- `name` - (Optional) The name of the private endpoint. One will be generated if not set.
-- `role_assignments` - (Optional) A map of role assignments to create on the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. See `var.role_assignments` for more information.
-- `lock` - (Optional) The lock level to apply to the private endpoint. Default is `None`. Possible values are `None`, `CanNotDelete`, and `ReadOnly`.
-- `tags` - (Optional) A mapping of tags to assign to the private endpoint.
-- `subnet_resource_id` - The resource ID of the subnet to deploy the private endpoint in.
-- `private_dns_zone_group_name` - (Optional) The name of the private DNS zone group. One will be generated if not set.
-- `private_dns_zone_resource_ids` - (Optional) A set of resource IDs of private DNS zones to associate with the private endpoint. If not set, no zone groups will be created and the private endpoint will not be associated with any private DNS zones. DNS records must be managed external to this module.
-- `application_security_group_resource_ids` - (Optional) A map of resource IDs of application security groups to associate with the private endpoint. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `private_service_connection_name` - (Optional) The name of the private service connection. One will be generated if not set.
-- `network_interface_name` - (Optional) The name of the network interface. One will be generated if not set.
-- `location` - (Optional) The Azure location where the resources will be deployed. Defaults to the location of the resource group.
-- `resource_group_name` - (Optional) The resource group where the resources will be deployed. Defaults to the resource group of this resource.
-- `ip_configurations` - (Optional) A map of IP configurations to create on the private endpoint. If not specified the platform will create one. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  - `name` - The name of the IP configuration.
-  - `private_ip_address` - The private IP address of the IP configuration.
-
-Type:
-
-```hcl
-map(object({
-    name = optional(string, null)
-    role_assignments = optional(map(object({
-      role_definition_id_or_name             = string
-      principal_id                           = string
-      description                            = optional(string, null)
-      skip_service_principal_aad_check       = optional(bool, false)
-      condition                              = optional(string, null)
-      condition_version                      = optional(string, null)
-      delegated_managed_identity_resource_id = optional(string, null)
-    })), {})
-    lock = optional(object({
-      kind = string
-      name = optional(string, null)
-    }), null)
-    tags                                    = optional(map(string), null)
-    subnet_resource_id                      = string
-    private_dns_zone_group_name             = optional(string, "default")
-    private_dns_zone_resource_ids           = optional(set(string), [])
-    application_security_group_associations = optional(map(string), {})
-    private_service_connection_name         = optional(string, null)
-    network_interface_name                  = optional(string, null)
-    location                                = optional(string, null)
-    resource_group_name                     = optional(string, null)
-    ip_configurations = optional(map(object({
-      name               = string
-      private_ip_address = string
-    })), {})
-  }))
-```
-
-Default: `{}`
-
-### <a name="input_private_endpoints_manage_dns_zone_group"></a> [private\_endpoints\_manage\_dns\_zone\_group](#input\_private\_endpoints\_manage\_dns\_zone\_group)
-
-Description: Whether to manage private DNS zone groups with this module. If set to false, you must manage private DNS zone groups externally, e.g. using Azure Policy.
-
-Type: `bool`
-
-Default: `true`
-
-### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
-
-Description: A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-
-- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
-- `principal_id` - The ID of the principal to assign the role to.
-- `description` - The description of the role assignment.
-- `skip_service_principal_aad_check` - If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
-- `condition` - The condition which will be used to scope the role assignment.
-- `condition_version` - The version of the condition syntax. Valid values are '2.0'.
-- `delegated_managed_identity_resource_id` - The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created.
-- `principal_type` - The type of the principal\_id. Possible values are `User`, `Group` and `ServicePrincipal`. Changing this forces a new resource to be created. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
-
-> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
-
-Type:
-
-```hcl
-map(object({
-    role_definition_id_or_name             = string
-    principal_id                           = string
-    description                            = optional(string, null)
-    skip_service_principal_aad_check       = optional(bool, false)
-    condition                              = optional(string, null)
-    condition_version                      = optional(string, null)
-    delegated_managed_identity_resource_id = optional(string, null)
-    principal_type                         = optional(string, null)
-  }))
-```
-
-Default: `{}`
+Default: `"dema"`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
@@ -273,13 +469,83 @@ Default: `null`
 
 The following outputs are exported:
 
-### <a name="output_private_endpoints"></a> [private\_endpoints](#output\_private\_endpoints)
+### <a name="output_approvers"></a> [approvers](#output\_approvers)
 
-Description:   A map of the private endpoints created.
+Description: The list of approvers matched from the organization.
+
+### <a name="output_managed_identity_client_ids"></a> [managed\_identity\_client\_ids](#output\_managed\_identity\_client\_ids)
+
+Description: A map of managed identity client IDs for each environment split (plan/apply).
+
+### <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id)
+
+Description: The subscription ID.
+
+### <a name="output_subscription_name"></a> [subscription\_name](#output\_subscription\_name)
+
+Description: The subscription display name.
+
+### <a name="output_tenant_id"></a> [tenant\_id](#output\_tenant\_id)
+
+Description: The tenant ID.
 
 ## Modules
 
-No modules.
+The following Modules are called:
+
+### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
+
+Source: Azure/avm-ptn-cicd-agents-and-runners/azurerm
+
+Version: 0.5.2
+
+### <a name="module_ip_addresses"></a> [ip\_addresses](#module\_ip\_addresses)
+
+Source: Azure/avm-utl-network-ip-addresses/azurerm
+
+Version: 0.1.1
+
+### <a name="module_private_dns_zone_storage_account"></a> [private\_dns\_zone\_storage\_account](#module\_private\_dns\_zone\_storage\_account)
+
+Source: Azure/avm-res-network-privatednszone/azurerm
+
+Version: 0.5.0
+
+### <a name="module_regions"></a> [regions](#module\_regions)
+
+Source: Azure/avm-utl-regions/azurerm
+
+Version: 0.12.0
+
+### <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group)
+
+Source: Azure/avm-res-resources-resourcegroup/azurerm
+
+Version: 0.2.2
+
+### <a name="module_resource_group_environments"></a> [resource\_group\_environments](#module\_resource\_group\_environments)
+
+Source: Azure/avm-res-resources-resourcegroup/azurerm
+
+Version: 0.2.2
+
+### <a name="module_storage_account"></a> [storage\_account](#module\_storage\_account)
+
+Source: Azure/avm-res-storage-storageaccount/azurerm
+
+Version: 0.6.8
+
+### <a name="module_user_assigned_managed_identity"></a> [user\_assigned\_managed\_identity](#module\_user\_assigned\_managed\_identity)
+
+Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
+
+Version: 0.5.0
+
+### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
+
+Source: Azure/avm-res-network-virtualnetwork/azurerm
+
+Version: 0.17.1
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
