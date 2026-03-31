@@ -46,9 +46,10 @@ module "test" {
 
   environments = {
     dev = {
-      display_order = 1
-      display_name  = "Development"
-      scope         = "subscription"
+      display_order   = 1
+      display_name    = "Development"
+      scope           = "subscription"
+      subscription_id = var.target_subscription_id
       identities = {
         read = { enabled = false }
       }
