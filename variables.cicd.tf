@@ -12,6 +12,12 @@ variable "azuredevops_create_project" {
   description = "Whether to create a new Azure DevOps project or use an existing one."
 }
 
+variable "azuredevops_create_template_repository" {
+  type        = bool
+  default     = true
+  description = "Whether to create a template repository for CI/CD pipeline templates. Set to false if you don't need a template repository."
+}
+
 variable "azuredevops_existing_template_repository_name" {
   type        = string
   default     = null
@@ -21,7 +27,7 @@ variable "azuredevops_existing_template_repository_name" {
 variable "azuredevops_pipeline_folder_path" {
   type        = string
   default     = null
-  description = "The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
+  description = "The absolute path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates."
 }
 
 variable "azuredevops_pipelines" {
@@ -83,5 +89,5 @@ variable "deployment_mode" {
 variable "example_module_path" {
   type        = string
   default     = null
-  description = "The relative path to the example module to seed into the created repository."
+  description = "The absolute path to the example module to seed into the created repository."
 }

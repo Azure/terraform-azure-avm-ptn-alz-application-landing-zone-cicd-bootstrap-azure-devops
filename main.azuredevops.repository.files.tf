@@ -1,6 +1,6 @@
 locals {
   effective_pipeline_folder = var.azuredevops_pipeline_folder_path != null ? var.azuredevops_pipeline_folder_path : (
-    contains(["terraform", "bicep"], var.deployment_mode) ? "pipelines/${var.deployment_mode}" : null
+    contains(["terraform", "bicep"], var.deployment_mode) ? "${path.module}/pipelines/${var.deployment_mode}" : null
   )
   environment_replacements = { for environment_key, environment_value in var.environments : "${format("%03s", environment_value.display_order)}-${environment_key}" => {
     name                          = lower(replace(environment_key, "-", ""))
@@ -22,7 +22,7 @@ locals {
     name    = file
     content = templatefile("${local.pipeline_main_folder}/${file}", local.pipeline_main_replacements)
   } } : {}
-  pipeline_main_folder = local.effective_pipeline_folder != null ? "${path.module}/${local.effective_pipeline_folder}/main" : null
+  pipeline_main_folder = local.effective_pipeline_folder != null ? "${local.effective_pipeline_folder}/main" : null
   pipeline_main_replacements = {
     environments                     = local.environment_replacements
     project_name                     = local.azure_devops_project_name
@@ -35,8 +35,8 @@ locals {
     name    = file
     content = file("${local.pipeline_template_folder}/${file}")
   } } : {}
-  pipeline_template_folder = local.effective_pipeline_folder != null ? "${path.module}/${local.effective_pipeline_folder}/templates" : null
-  template_folder          = var.example_module_path != null ? "${path.module}/${var.example_module_path}" : null
+  pipeline_template_folder = local.effective_pipeline_folder != null ? "${local.effective_pipeline_folder}/templates" : null
+  template_folder          = var.example_module_path
 }
 
 resource "azuredevops_git_repository_file" "this" {

@@ -42,7 +42,7 @@ module "test" {
   compute_type                  = "azure_container_app"
   deployment_mode               = "bicep"
   enable_telemetry              = var.enable_telemetry
-  example_module_path           = "examples/example-module-bicep"
+  example_module_path           = "${path.root}/../../example-repos/bicep"
 }
 ```
 

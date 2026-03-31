@@ -203,6 +203,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_azuredevops_create_template_repository"></a> [azuredevops\_create\_template\_repository](#input\_azuredevops\_create\_template\_repository)
+
+Description: Whether to create a template repository for CI/CD pipeline templates. Set to false if you don't need a template repository.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_azuredevops_existing_approvers_group_origin_id"></a> [azuredevops\_existing\_approvers\_group\_origin\_id](#input\_azuredevops\_existing\_approvers\_group\_origin\_id)
 
 Description: The origin ID of a pre-existing Azure DevOps group to use for approvals (BYO mode). When set, the module will not create an approval group or look up approver users.
@@ -229,7 +237,7 @@ Default: `"https://dev.azure.com"`
 
 ### <a name="input_azuredevops_pipeline_folder_path"></a> [azuredevops\_pipeline\_folder\_path](#input\_azuredevops\_pipeline\_folder\_path)
 
-Description: The relative path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates.
+Description: The absolute path to the folder containing pipeline YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'pipelines/terraform' or 'pipelines/bicep'). Set to a custom path to use your own pipeline templates.
 
 Type: `string`
 
@@ -384,7 +392,7 @@ Default:
 
 ### <a name="input_example_module_path"></a> [example\_module\_path](#input\_example\_module\_path)
 
-Description: The relative path to the example module to seed into the created repository.
+Description: The absolute path to the example module to seed into the created repository.
 
 Type: `string`
 

@@ -40,7 +40,7 @@ module "test" {
   location                      = var.location
   agent_use_self_hosted         = false
   enable_telemetry              = var.enable_telemetry
-  example_module_path           = "examples/example-module-terraform"
+  example_module_path           = "${path.root}/../../example-repos/terraform"
 }
 ```
 
