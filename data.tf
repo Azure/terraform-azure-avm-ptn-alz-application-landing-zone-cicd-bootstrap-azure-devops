@@ -5,7 +5,8 @@ locals {
 }
 
 data "azapi_resource_action" "subscription" {
-  for_each               = local.environment_subscription_ids
+  for_each = local.environment_subscription_ids
+
   action                 = ""
   method                 = "GET"
   resource_id            = "/subscriptions/${each.value}"
