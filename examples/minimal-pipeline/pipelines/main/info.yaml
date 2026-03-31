@@ -1,0 +1,21 @@
+---
+trigger:
+  - none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - pwsh: |
+      Write-Host "=== Environment Info ==="
+      Write-Host "Pipeline: $(Build.DefinitionName)"
+      Write-Host "Repository: $(Build.Repository.Name)"
+      Write-Host "Branch: $(Build.SourceBranch)"
+      Write-Host "Build ID: $(Build.BuildId)"
+      Write-Host "Agent: $(Agent.Name)"
+      Write-Host "OS: $(Agent.OS)"
+      Write-Host ""
+      Write-Host "=== Azure Connection ==="
+      Write-Host "This is a minimal pipeline example."
+      Write-Host "No actual deployment is performed."
+    displayName: 'Print Environment Info'
