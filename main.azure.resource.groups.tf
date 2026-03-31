@@ -54,6 +54,7 @@ locals {
       for ra_key, ra_value in env_value.identities[identity_key].role_assignments : {
         key                        = "${env_key}-${identity_key}-${ra_key}"
         scope                      = env_value.resource_id
+        subscription_id            = env_value.subscription_id
         role_definition_id_or_name = ra_value.role_definition_id_or_name
         principal_id               = module.user_assigned_managed_identity["${env_key}-${identity_key}"].principal_id
       }
@@ -70,7 +71,7 @@ resource "azapi_resource" "role_assignment" {
   body = {
     properties = {
       principalId      = each.value.principal_id
-      roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : module.role_definitions.role_definition_rolename_to_resource_id[each.value.role_definition_id_or_name]
+      roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "/subscriptions/${each.value.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${module.role_definitions.role_definition_rolename_to_name[each.value.role_definition_id_or_name]}"
     }
   }
   create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
