@@ -11,11 +11,11 @@ terraform {
   required_providers {
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.4"
+      version = "~> 2.9"
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.7"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -32,8 +32,18 @@ terraform {
   }
 }
 
+provider "azuredevops" {}
+
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
 
 data "azapi_client_config" "current" {}
@@ -42,7 +52,6 @@ data "azapi_client_config" "current" {}
 module "test" {
   source = "../../"
 
-  azuredevops_organization_name          = var.azuredevops_organization_name
   location                               = var.location
   agent_use_self_hosted                  = false
   azuredevops_create_template_repository = false
@@ -75,9 +84,9 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
 
-- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.4)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.9)
 
-- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.7)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
@@ -94,13 +103,7 @@ The following resources are used by this module:
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_azuredevops_organization_name"></a> [azuredevops\_organization\_name](#input\_azuredevops\_organization\_name)
-
-Description: The name of the Azure DevOps organization.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 

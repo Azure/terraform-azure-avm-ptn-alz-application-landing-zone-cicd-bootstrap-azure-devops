@@ -1,11 +1,3 @@
-# --- Project ---
-
-# --- Repositories ---
-
-# --- Deployment Mode ---
-
-# --- Pipeline Templates ---
-
 variable "azuredevops_create_project" {
   type        = bool
   default     = true

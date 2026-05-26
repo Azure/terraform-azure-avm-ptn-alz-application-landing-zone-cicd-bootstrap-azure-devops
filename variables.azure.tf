@@ -1,9 +1,3 @@
-# --- Virtual Network ---
-
-# --- Self-Hosted Agents ---
-
-# --- Storage / Private Networking ---
-
 variable "agent_authentication_method" {
   type        = string
   default     = "uami"
@@ -22,7 +16,7 @@ variable "agent_compute_type" {
 
   validation {
     condition     = contains(["azure_container_app", "azure_container_instance"], var.agent_compute_type)
-    error_message = "compute_type must be either 'azure_container_app' or 'azure_container_instance'."
+    error_message = "agent_compute_type must be either 'azure_container_app' or 'azure_container_instance'."
   }
 }
 
@@ -30,6 +24,17 @@ variable "agent_compute_use_availability_zones" {
   type        = bool
   default     = false
   description = "Use availability zones for the compute instances. This is off by default due to faults in various regions at time of authoring."
+}
+
+variable "agent_container_instance_count" {
+  type        = number
+  default     = 4
+  description = "The number of container instances to provision when `agent_compute_type` is 'azure_container_instance'. Ignored when `agent_compute_type` is 'azure_container_app'."
+
+  validation {
+    condition     = var.agent_container_instance_count >= 1
+    error_message = "agent_container_instance_count must be greater than or equal to 1."
+  }
 }
 
 variable "agent_existing_pool_name" {
@@ -59,7 +64,7 @@ variable "azure_alz_platform_landing_zone_mode_enabled" {
 variable "azure_existing_agents_subnet_resource_id" {
   type        = string
   default     = null
-  description = "The resource ID of a pre-existing subnet for agents (BYO mode). The subnet must have the appropriate delegation for the chosen `compute_type`."
+  description = "The resource ID of a pre-existing subnet for agents (BYO mode). The subnet must have the appropriate delegation for the chosen `agent_compute_type`."
 }
 
 variable "azure_existing_private_endpoints_subnet_resource_id" {
@@ -71,7 +76,7 @@ variable "azure_existing_private_endpoints_subnet_resource_id" {
 variable "azure_existing_virtual_network_resource_id" {
   type        = string
   default     = null
-  description = "The resource ID of a pre-existing virtual network (BYO mode). Must be set together with `existing_agents_subnet_resource_id` and `existing_private_endpoints_subnet_resource_id`. When set, the module will not create a virtual network or agents resource group."
+  description = "The resource ID of a pre-existing virtual network (BYO mode). Must be set together with `azure_existing_agents_subnet_resource_id` and `azure_existing_private_endpoints_subnet_resource_id`. When set, the module will not create a virtual network or agents resource group."
 }
 
 variable "azure_subnets_and_sizes" {
@@ -81,4 +86,9 @@ variable "azure_subnets_and_sizes" {
     private_endpoints = 29
   }
   description = "The CIDR prefix sizes for subnets within the virtual network."
+
+  validation {
+    condition     = alltrue([for k in ["agents", "private_endpoints"] : contains(keys(var.azure_subnets_and_sizes), k)])
+    error_message = "azure_subnets_and_sizes must contain entries for both 'agents' and 'private_endpoints'."
+  }
 }

@@ -11,7 +11,7 @@ terraform {
   required_providers {
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 1.7"
+      version = "~> 1.15"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -28,20 +28,29 @@ terraform {
   }
 }
 
+provider "azuredevops" {}
+
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+    storage {
+      data_plane_available = false
+    }
+  }
+  storage_use_azuread = true
 }
 
 # ACA with private networking and Terraform pipelines
 module "test" {
   source = "../../"
 
-  azuredevops_organization_name = var.azuredevops_organization_name
-  location                      = var.location
-  agent_use_self_hosted         = true
-  compute_type                  = "azure_container_app"
-  enable_telemetry              = var.enable_telemetry
-  example_module_path           = "${path.root}/../../example-repos/terraform"
+  location              = var.location
+  agent_compute_type    = "azure_container_app"
+  agent_use_self_hosted = true
+  enable_telemetry      = var.enable_telemetry
+  example_module_path   = "${path.root}/../../example-repos/terraform"
 }
 ```
 
@@ -52,7 +61,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
 
-- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.7)
+- <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
@@ -67,13 +76,7 @@ No resources.
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-The following input variables are required:
-
-### <a name="input_azuredevops_organization_name"></a> [azuredevops\_organization\_name](#input\_azuredevops\_organization\_name)
-
-Description: The name of the Azure DevOps organization.
-
-Type: `string`
+No required inputs.
 
 ## Optional Inputs
 

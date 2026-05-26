@@ -18,6 +18,11 @@ variable "agent_personal_access_token" {
   default     = null
   description = "The personal access token for the Azure DevOps organization. Required for agent authentication when `agent_authentication_method` is 'pat'. Provider auth should be configured via the AZDO_PERSONAL_ACCESS_TOKEN environment variable."
   sensitive   = true
+
+  validation {
+    condition     = !(var.agent_use_self_hosted && var.agent_authentication_method == "pat") || var.agent_personal_access_token != null
+    error_message = "agent_personal_access_token must be set when agent_use_self_hosted is true and agent_authentication_method is 'pat'."
+  }
 }
 
 variable "enable_telemetry" {

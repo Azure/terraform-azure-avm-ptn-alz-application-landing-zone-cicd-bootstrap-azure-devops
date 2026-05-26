@@ -1,6 +1,6 @@
 output "approvers" {
-  description = "The list of approvers matched from the organization."
-  value       = local.approvers
+  description = "The list of approver descriptors matched from the organization."
+  value       = tolist(local.approvers)
 }
 
 output "managed_identity_client_ids" {

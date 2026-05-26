@@ -39,8 +39,8 @@ provider "azurerm" {
 module "test" {
   source = "../../"
 
-  location                      = var.location
-  agent_use_self_hosted         = false
-  enable_telemetry              = var.enable_telemetry
-  example_module_path           = "${path.root}/../../example-repos/terraform"
+  location              = var.location
+  agent_use_self_hosted = false
+  enable_telemetry      = var.enable_telemetry
+  example_module_path   = "${path.root}/../../example-repos/terraform"
 }
