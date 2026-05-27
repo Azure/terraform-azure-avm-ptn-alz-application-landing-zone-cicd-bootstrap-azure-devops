@@ -42,14 +42,35 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-# BYO agent pool with Terraform pipelines (no self-hosted infra created)
+locals {
+  byo_environment  = "test"
+  byo_workload     = "byob"
+  seed_environment = "seed"
+  seed_workload    = "byos"
+}
+
+# Seed deployment: create self-hosted agent infrastructure including an agent pool.
+module "seed" {
+  source = "../../"
+
+  location                               = var.location
+  azuredevops_create_main_repository     = false
+  azuredevops_create_template_repository = false
+  enable_telemetry                       = var.enable_telemetry
+  resource_name_environment              = local.seed_environment
+  resource_name_workload                 = local.seed_workload
+}
+
+# BYO deployment: consume the agent pool from the seed module.
 module "test" {
   source = "../../"
 
-  location                 = var.location
-  agent_existing_pool_name = "my-existing-agent-pool"
-  enable_telemetry         = var.enable_telemetry
-  example_module_path      = "${path.root}/../../example-repos/terraform"
+  location                  = var.location
+  agent_existing_pool_name  = module.seed.agent_pool_name
+  enable_telemetry          = var.enable_telemetry
+  example_module_path       = "${path.root}/../../example-repos/terraform"
+  resource_name_environment = local.byo_environment
+  resource_name_workload    = local.byo_workload
 }
 ```
 
@@ -106,6 +127,12 @@ No outputs.
 ## Modules
 
 The following Modules are called:
+
+### <a name="module_seed"></a> [seed](#module\_seed)
+
+Source: ../../
+
+Version:
 
 ### <a name="module_test"></a> [test](#module\_test)
 

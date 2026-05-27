@@ -1,5 +1,5 @@
 resource "azuredevops_variable_group" "this" {
-  for_each     = var.deployment_mode == "terraform" ? var.environments : {}
+  for_each     = local.create_main_repository && var.deployment_mode == "terraform" ? var.environments : {}
   project_id   = local.azure_devops_project_id
   name         = each.key
   description  = "Variable Group for ${each.value.display_name}"
@@ -34,7 +34,7 @@ resource "azuredevops_variable_group" "this" {
 }
 
 resource "azuredevops_variable_group" "bicep" {
-  for_each     = var.deployment_mode == "bicep" ? var.environments : {}
+  for_each     = local.create_main_repository && var.deployment_mode == "bicep" ? var.environments : {}
   project_id   = local.azure_devops_project_id
   name         = each.key
   description  = "Variable Group for ${each.value.display_name}"

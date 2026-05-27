@@ -1,3 +1,9 @@
+variable "azuredevops_create_main_repository" {
+  type        = bool
+  default     = true
+  description = "Whether to create and manage the main repository and repository-scoped CI/CD resources."
+}
+
 variable "azuredevops_create_project" {
   type        = bool
   default     = true

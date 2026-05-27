@@ -27,7 +27,7 @@ locals {
 }
 
 resource "azuredevops_build_definition" "this" {
-  for_each   = local.pipelines
+  for_each   = local.create_main_repository ? local.pipelines : {}
   project_id = local.azure_devops_project_id
   name       = each.value.name
 
@@ -37,14 +37,14 @@ resource "azuredevops_build_definition" "this" {
 
   repository {
     repo_type   = "TfsGit"
-    repo_id     = azuredevops_git_repository.this.id
-    branch_name = azuredevops_git_repository.this.default_branch
+    repo_id     = azuredevops_git_repository.this[0].id
+    branch_name = azuredevops_git_repository.this[0].default_branch
     yml_path    = each.value.file_path
   }
 }
 
 resource "azuredevops_pipeline_authorization" "service_connection" {
-  for_each    = local.pipelines_by_service_connection
+  for_each    = local.create_main_repository ? local.pipelines_by_service_connection : {}
   project_id  = local.azure_devops_project_id
   resource_id = azuredevops_serviceendpoint_azurerm.this[each.value.service_connection].id
   type        = "endpoint"
@@ -52,7 +52,7 @@ resource "azuredevops_pipeline_authorization" "service_connection" {
 }
 
 resource "azuredevops_pipeline_authorization" "environment" {
-  for_each    = local.pipelines_by_environment
+  for_each    = local.create_main_repository ? local.pipelines_by_environment : {}
   project_id  = local.azure_devops_project_id
   resource_id = azuredevops_environment.this[each.value.environment].id
   type        = "environment"
@@ -60,7 +60,7 @@ resource "azuredevops_pipeline_authorization" "environment" {
 }
 
 resource "azuredevops_pipeline_authorization" "agent_pool" {
-  for_each    = local.create_agent_infrastructure ? local.pipelines : {}
+  for_each    = local.create_main_repository && local.create_agent_infrastructure ? local.pipelines : {}
   project_id  = local.azure_devops_project_id
   resource_id = azuredevops_agent_queue.this[0].id
   type        = "queue"

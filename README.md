@@ -252,6 +252,14 @@ Default:
 }
 ```
 
+### <a name="input_azuredevops_create_main_repository"></a> [azuredevops\_create\_main\_repository](#input\_azuredevops\_create\_main\_repository)
+
+Description: Whether to create and manage the main repository and repository-scoped CI/CD resources.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_azuredevops_create_project"></a> [azuredevops\_create\_project](#input\_azuredevops\_create\_project)
 
 Description: Whether to create a new Azure DevOps project or use an existing one.
@@ -526,6 +534,10 @@ Default: `null`
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_agent_pool_name"></a> [agent\_pool\_name](#output\_agent\_pool\_name)
+
+Description: The Azure DevOps agent pool name used by this deployment.
 
 ### <a name="output_approvers"></a> [approvers](#output\_approvers)
 
