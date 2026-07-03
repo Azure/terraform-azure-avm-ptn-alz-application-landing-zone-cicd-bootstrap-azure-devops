@@ -10,10 +10,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
   }
 }
 
@@ -31,14 +27,6 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-resource "random_string" "workload" {
-  length  = 4
-  lower   = true
-  upper   = false
-  numeric = true
-  special = false
-}
-
 locals {
   byo_environment  = "test"
   seed_environment = "seed"
@@ -53,7 +41,7 @@ module "seed" {
   azuredevops_create_template_repository = false
   enable_telemetry                       = var.enable_telemetry
   resource_name_environment              = local.seed_environment
-  resource_name_workload                 = random_string.workload.result
+  resource_name_workload                 = "byoa"
 }
 
 # BYO deployment: consume the agent pool from the seed module.
@@ -65,5 +53,5 @@ module "test" {
   enable_telemetry          = var.enable_telemetry
   example_module_path       = "${path.root}/../../example-repos/terraform"
   resource_name_environment = local.byo_environment
-  resource_name_workload    = random_string.workload.result
+  resource_name_workload    = "byoa"
 }
