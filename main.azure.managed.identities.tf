@@ -9,7 +9,7 @@ module "user_assigned_managed_identity" {
 }
 
 resource "azapi_resource" "federated_identity_credential" {
-  for_each = local.environment_split
+  for_each = local.create_main_repository ? local.environment_split : {}
 
   name      = each.value.federated_credential_name
   parent_id = module.user_assigned_managed_identity[each.key].resource_id
