@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -27,11 +31,18 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
 # Microsoft-hosted agents with Terraform pipelines (no self-hosted infra)
 module "test" {
   source = "../../"
 
-  resource_name_workload = "msag"
+  resource_name_workload = random_string.workload.result
 
   location              = var.location
   agent_use_self_hosted = false

@@ -17,6 +17,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -39,6 +43,13 @@ locals {
   seed_environment = "seed"
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
 # Seed deployment: create self-hosted agent infrastructure including an agent pool.
 module "seed" {
   source = "../../"
@@ -48,7 +59,7 @@ module "seed" {
   azuredevops_create_template_repository = false
   enable_telemetry                       = var.enable_telemetry
   resource_name_environment              = local.seed_environment
-  resource_name_workload                 = "byoa"
+  resource_name_workload                 = random_string.workload.result
 }
 
 # BYO deployment: consume the agent pool from the seed module.
@@ -60,7 +71,7 @@ module "test" {
   enable_telemetry          = var.enable_telemetry
   example_module_path       = "${path.root}/../../example-repos/terraform"
   resource_name_environment = local.byo_environment
-  resource_name_workload    = "byoa"
+  resource_name_workload    = random_string.workload.result
 }
 ```
 
@@ -75,9 +86,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
-No resources.
+The following resources are used by this module:
+
+- [random_string.workload](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
