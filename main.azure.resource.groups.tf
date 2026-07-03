@@ -71,6 +71,7 @@ resource "azapi_resource" "role_assignment" {
   body = {
     properties = {
       principalId      = each.value.principal_id
+      principalType    = "ServicePrincipal"
       roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "/subscriptions/${each.value.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${module.role_definitions.role_definition_rolename_to_name[each.value.role_definition_id_or_name]}"
     }
   }
