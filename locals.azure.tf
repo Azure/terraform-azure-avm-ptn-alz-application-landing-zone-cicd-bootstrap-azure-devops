@@ -8,5 +8,5 @@ locals {
   effective_pe_subnet_id      = var.azure_existing_private_endpoints_subnet_resource_id != null ? var.azure_existing_private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
   effective_vnet_resource_id  = var.azure_existing_virtual_network_resource_id != null ? var.azure_existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
   is_self_hosted              = var.agent_use_self_hosted || var.agent_existing_pool_name != null
-  use_private_networking      = local.effective_vnet_resource_id != null
+  use_private_networking      = var.azure_existing_virtual_network_resource_id != null || local.create_vnet_infrastructure
 }

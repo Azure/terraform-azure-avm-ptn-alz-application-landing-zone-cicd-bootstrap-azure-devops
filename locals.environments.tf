@@ -27,7 +27,7 @@ locals {
     dependent_environment = value.dependent_environment
     scope                 = value.scope
     subscription_id       = coalesce(value.subscription_id, data.azapi_client_config.current.subscription_id)
-    resource_id           = coalesce(value.resource_id, value.scope == "subscription" ? "/subscriptions/${coalesce(value.subscription_id, data.azapi_client_config.current.subscription_id)}" : null)
+    resource_id           = value.resource_id != null ? value.resource_id : (value.scope == "subscription" ? "/subscriptions/${coalesce(value.subscription_id, data.azapi_client_config.current.subscription_id)}" : null)
     create_resource_group = value.scope == "resource_group" && value.resource_id == null && value.resource_group_create
     identities            = value.identities
     resource_group_name = coalesce(value.resource_group_name, templatestring(local.resource_names.resource_group_env_name, merge(local.name_replacements, {
