@@ -17,6 +17,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -34,9 +38,19 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+}
+
 # Microsoft-hosted agents with Terraform pipelines (no self-hosted infra)
 module "test" {
   source = "../../"
+
+  resource_name_workload = random_string.workload.result
 
   location              = var.location
   agent_use_self_hosted = false
@@ -56,9 +70,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
-No resources.
+The following resources are used by this module:
+
+- [random_string.workload](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs

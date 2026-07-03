@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -27,9 +31,19 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  lower   = true
+  upper   = false
+  numeric = true
+  special = false
+}
+
 # This is the module call
 module "test" {
   source = "../../"
+
+  resource_name_workload = random_string.workload.result
 
   location            = var.location
   enable_telemetry    = var.enable_telemetry
