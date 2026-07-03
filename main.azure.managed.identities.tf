@@ -25,4 +25,13 @@ resource "azapi_resource" "federated_identity_credential" {
   delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  # Azure serialises federated identity credential writes per managed identity. When several
+  # credentials are created for the same user-assigned identity in parallel (Terraform's default
+  # concurrency), Azure returns a 409 "ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity".
+  # Retry (with the provider's default backoff + randomisation, which desynchronises sibling writers)
+  # so the credentials serialise and eventually succeed without failing the run.
+  retry = {
+    error_message_regex = ["ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity"]
+  }
 }
