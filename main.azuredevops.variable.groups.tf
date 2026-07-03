@@ -1,5 +1,6 @@
 resource "azuredevops_variable_group" "this" {
-  for_each     = local.create_main_repository && var.deployment_mode == "terraform" ? var.environments : {}
+  for_each = local.create_main_repository && var.deployment_mode == "terraform" ? var.environments : {}
+
   project_id   = local.azure_devops_project_id
   name         = each.key
   description  = "Variable Group for ${each.value.display_name}"
@@ -16,17 +17,14 @@ resource "azuredevops_variable_group" "this" {
       } : {},
     ))
   }
-
   variable {
     name  = "VAR_FILE_PATH"
     value = "./config/${each.key}.tfvars"
   }
-
   variable {
     name  = "BACKEND_AZURE_STORAGE_ACCOUNT_NAME"
     value = module.storage_account[0].name
   }
-
   variable {
     name  = "BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME"
     value = each.key
@@ -34,7 +32,8 @@ resource "azuredevops_variable_group" "this" {
 }
 
 resource "azuredevops_variable_group" "bicep" {
-  for_each     = local.create_main_repository && var.deployment_mode == "bicep" ? var.environments : {}
+  for_each = local.create_main_repository && var.deployment_mode == "bicep" ? var.environments : {}
+
   project_id   = local.azure_devops_project_id
   name         = each.key
   description  = "Variable Group for ${each.value.display_name}"

@@ -40,7 +40,8 @@ locals {
 }
 
 resource "azuredevops_git_repository_file" "this" {
-  for_each            = local.create_main_repository ? local.main_repository_files : {}
+  for_each = local.create_main_repository ? local.main_repository_files : {}
+
   repository_id       = azuredevops_git_repository.this[0].id
   file                = each.key
   content             = each.value.content
@@ -50,7 +51,8 @@ resource "azuredevops_git_repository_file" "this" {
 }
 
 resource "azuredevops_git_repository_file" "template" {
-  for_each            = local.create_main_repository && local.create_template_repository ? local.pipeline_template_files : {}
+  for_each = local.create_main_repository && local.create_template_repository ? local.pipeline_template_files : {}
+
   repository_id       = azuredevops_git_repository.template[0].id
   file                = each.key
   content             = each.value.content

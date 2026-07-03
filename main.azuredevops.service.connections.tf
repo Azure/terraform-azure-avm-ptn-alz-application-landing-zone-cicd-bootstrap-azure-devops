@@ -1,9 +1,11 @@
 resource "azuredevops_serviceendpoint_azurerm" "this" {
-  for_each                               = local.create_main_repository ? local.environment_split : {}
+  for_each = local.create_main_repository ? local.environment_split : {}
+
   project_id                             = local.azure_devops_project_id
   service_endpoint_name                  = each.value.service_connection_name
   description                            = "Managed by Terraform"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
+
   credentials {
     serviceprincipalid = module.user_assigned_managed_identity[each.key].client_id
   }
@@ -17,21 +19,21 @@ locals {
 }
 
 resource "azuredevops_check_approval" "this" {
-  for_each             = local.create_main_repository && local.has_approvers ? local.environments_with_approvals : {}
-  project_id           = local.azure_devops_project_id
-  target_resource_id   = azuredevops_serviceendpoint_azurerm.this["${each.key}-write"].id
-  target_resource_type = "endpoint"
+  for_each = local.create_main_repository && local.has_approvers ? local.environments_with_approvals : {}
 
+  project_id            = local.azure_devops_project_id
+  target_resource_id    = azuredevops_serviceendpoint_azurerm.this["${each.key}-write"].id
+  target_resource_type  = "endpoint"
   requester_can_approve = length(var.approvers) == 1
   approvers = [
     local.effective_approvers_origin_id
   ]
-
   timeout = 43200
 }
 
 resource "azuredevops_check_exclusive_lock" "service_connection" {
-  for_each             = local.create_main_repository ? local.environment_split : {}
+  for_each = local.create_main_repository ? local.environment_split : {}
+
   project_id           = local.azure_devops_project_id
   target_resource_id   = azuredevops_serviceendpoint_azurerm.this[each.key].id
   target_resource_type = "endpoint"
@@ -39,7 +41,8 @@ resource "azuredevops_check_exclusive_lock" "service_connection" {
 }
 
 resource "azuredevops_check_required_template" "this" {
-  for_each             = local.create_main_repository ? { for k, v in local.environment_split : k => v if length(v.required_templates) > 0 } : {}
+  for_each = local.create_main_repository ? { for k, v in local.environment_split : k => v if length(v.required_templates) > 0 } : {}
+
   project_id           = local.azure_devops_project_id
   target_resource_id   = azuredevops_serviceendpoint_azurerm.this[each.key].id
   target_resource_type = "endpoint"

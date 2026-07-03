@@ -1,11 +1,13 @@
 data "azuredevops_project" "this" {
   count = var.azuredevops_create_project ? 0 : 1
-  name  = var.azuredevops_project_name
+
+  name = var.azuredevops_project_name
 }
 
 resource "azuredevops_project" "this" {
   count = var.azuredevops_create_project ? 1 : 0
-  name  = local.resource_names.project_name
+
+  name = local.resource_names.project_name
 }
 
 locals {

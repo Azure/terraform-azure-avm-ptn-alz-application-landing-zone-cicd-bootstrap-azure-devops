@@ -1,13 +1,16 @@
 resource "azuredevops_group" "this" {
-  count        = local.create_approval_group ? 1 : 0
+  count = local.create_approval_group ? 1 : 0
+
   scope        = local.azure_devops_project_id
   display_name = local.resource_names.group_name
   description  = "Approvers for the Terraform Apply"
 }
 
 data "azuredevops_users" "this" {
-  for_each       = local.create_approval_group ? var.approvers : {}
+  for_each = local.create_approval_group ? var.approvers : {}
+
   principal_name = each.value
+
   lifecycle {
     postcondition {
       condition     = length(self.users) > 0
@@ -23,7 +26,8 @@ locals {
 }
 
 resource "azuredevops_group_membership" "this" {
-  count   = local.create_approval_group ? 1 : 0
+  count = local.create_approval_group ? 1 : 0
+
   group   = azuredevops_group.this[0].descriptor
   members = local.approvers
 }
