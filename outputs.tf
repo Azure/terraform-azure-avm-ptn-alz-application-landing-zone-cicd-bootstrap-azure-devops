@@ -13,6 +13,11 @@ output "managed_identity_client_ids" {
   value       = local.create_main_repository ? { for env_key, env_value in local.environment_split : env_key => module.user_assigned_managed_identity[env_key].client_id } : {}
 }
 
+output "resource_id" {
+  description = "The resource ID of the Azure DevOps project that this module bootstraps."
+  value       = local.azure_devops_project_id
+}
+
 output "subscription_id" {
   description = "The subscription ID."
   value       = data.azapi_client_config.current.subscription_id
