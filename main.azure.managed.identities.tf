@@ -33,4 +33,27 @@ resource "azapi_resource" "federated_identity_credential" {
     error_message_regex = ["ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity"]
   }
   update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
+
+  # Ensure the federated identity credential is destroyed (and given time to propagate out of Entra)
+  # before the backing Azure DevOps service connection is deleted. See time_sleep below.
+  depends_on = [time_sleep.service_connection_teardown]
+}
+
+# Azure DevOps refuses to delete a workload-identity-federation service connection while federated
+# identity credentials for its backing identity still exist in the Entra tenant ("Cannot delete this
+# service connection while federated credentials for app <id> exist in Entra tenant"). On destroy
+# Terraform removes the federated identity credential before the service connection (the credential
+# references the connection), but the Entra deletion is eventually consistent and may not have
+# propagated by the time the service connection delete runs, causing an intermittent teardown failure.
+# This time_sleep sits between the credential and the connection in the dependency graph: the trigger
+# makes it depend on the service connection (created after it, destroyed before it) and the credential
+# depends_on it, so on destroy it enforces a delay after the credential is removed and before the
+# connection is deleted, giving Entra time to propagate the deletion. It adds no create-time delay.
+resource "time_sleep" "service_connection_teardown" {
+  for_each = local.create_main_repository ? local.environment_split : {}
+
+  destroy_duration = "90s"
+  triggers = {
+    service_connection_id = azuredevops_serviceendpoint_azurerm.this[each.key].id
+  }
 }
