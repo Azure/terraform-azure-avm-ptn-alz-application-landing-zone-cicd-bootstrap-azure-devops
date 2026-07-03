@@ -11,5 +11,6 @@ locals {
   effective_template_repo_name = var.azuredevops_existing_template_repository_name != null ? var.azuredevops_existing_template_repository_name : (
     local.create_template_repository ? azuredevops_git_repository.template[0].name : ""
   )
-  has_approvers = var.azuredevops_existing_approvers_group_origin_id != null || length(var.approvers) > 0
+  has_approvers     = var.azuredevops_existing_approvers_group_origin_id != null || length(var.approvers) > 0
+  has_template_repo = var.azuredevops_existing_template_repository_name != null || local.create_template_repository
 }
