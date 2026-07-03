@@ -64,8 +64,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
-
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
@@ -546,6 +544,10 @@ Description: The list of approver descriptors matched from the organization.
 ### <a name="output_managed_identity_client_ids"></a> [managed\_identity\_client\_ids](#output\_managed\_identity\_client\_ids)
 
 Description: A map of managed identity client IDs for each environment split (plan/apply).
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the Azure DevOps project that this module bootstraps.
 
 ### <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id)
 
