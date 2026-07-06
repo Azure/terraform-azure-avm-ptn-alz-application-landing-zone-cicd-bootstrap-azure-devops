@@ -42,6 +42,16 @@ resource "azuredevops_build_definition" "this" {
     branch_name = azuredevops_git_repository.this[0].default_branch
     yml_path    = each.value.file_path
   }
+
+  # Ensure the repository files (including the pipeline YAML) exist before the
+  # build definitions are created, and - critically - that the build definitions
+  # are destroyed *before* those files are removed. On teardown the provider
+  # deletes each repository file with its own "Delete <file>" commit to the
+  # default branch. The generated CD pipeline triggers on pushes to that branch,
+  # so if the build definitions still existed, those teardown commits would queue
+  # pipeline runs that fail (the agent pool and variable groups are already gone).
+  # Destroying the build definitions first means there is nothing left to trigger.
+  depends_on = [azuredevops_git_repository_file.this]
 }
 
 resource "azuredevops_pipeline_authorization" "service_connection" {
