@@ -1,0 +1,45 @@
+module "private_dns_zone_storage_account" {
+  source  = "Azure/avm-res-network-privatednszone/azurerm"
+  version = "0.5.0"
+  count   = var.deployment_mode == "terraform" && local.use_private_networking && !var.azure_alz_platform_landing_zone_mode_enabled ? 1 : 0
+
+  domain_name = "privatelink.blob.core.windows.net"
+  parent_id   = module.resource_group["state"].resource_id
+  virtual_network_links = {
+    vnet_link = {
+      vnetlinkname = "storage-account"
+      vnetid       = local.effective_vnet_resource_id
+    }
+  }
+}
+
+module "storage_account" {
+  source  = "Azure/avm-res-storage-storageaccount/azurerm"
+  version = "0.6.8"
+  count   = var.deployment_mode == "terraform" ? 1 : 0
+
+  location                 = var.location
+  name                     = local.resource_names.storage_account_name
+  resource_group_name      = module.resource_group["state"].name
+  account_replication_type = "ZRS"
+  account_tier             = "Standard"
+  containers = { for env_key, env_value in local.environments : env_key => {
+    name          = env_key
+    public_access = "None"
+    role_assignments = { for identity_key, identity_value in env_value.identities : "uami-${identity_key}" => {
+      role_definition_id_or_name = "Storage Blob Data Contributor"
+      principal_id               = module.user_assigned_managed_identity["${env_key}-${identity_key}"].principal_id
+    } }
+    }
+  }
+  network_rules = local.use_private_networking ? {} : null
+  private_endpoints = local.use_private_networking ? { blob = {
+    name                          = local.resource_names.storage_account_private_endpoint_name
+    subnet_resource_id            = local.effective_pe_subnet_id
+    subresource_name              = "blob"
+    private_dns_zone_resource_ids = !var.azure_alz_platform_landing_zone_mode_enabled ? [module.private_dns_zone_storage_account[0].resource_id] : []
+    }
+  } : {}
+  private_endpoints_manage_dns_zone_group = !var.azure_alz_platform_landing_zone_mode_enabled
+  public_network_access_enabled           = !local.use_private_networking
+}

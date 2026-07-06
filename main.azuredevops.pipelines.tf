@@ -1,0 +1,82 @@
+locals {
+  pipelines = {
+    ci = {
+      name      = "01 - Continuous Integration"
+      file_path = "ci.yaml"
+    }
+    cd = {
+      name      = "02 - Continuous Delivery"
+      file_path = "cd.yaml"
+    }
+  }
+  pipelines_by_environment = { for environment_split in flatten([for env_key, env_value in var.environments : [
+    for pipeline_key, pipeline_value in local.pipelines : {
+      composite_key = "${env_key}-${pipeline_key}"
+      environment   = env_key
+      pipeline      = pipeline_key
+    }
+  ]]) : environment_split.composite_key => environment_split }
+  pipelines_by_service_connection = { for environment_split in flatten([for env_key, env_value in local.environment_split : [
+    for pipeline_key, pipeline_value in local.pipelines : {
+      composite_key      = "${env_key}-${pipeline_key}"
+      service_connection = env_key
+      pipeline           = pipeline_key
+      is_valid           = env_value.type == "read" || env_value.type == "write" && pipeline_key == "cd"
+    }
+  ]]) : environment_split.composite_key => environment_split if environment_split.is_valid }
+}
+
+resource "azuredevops_build_definition" "this" {
+  for_each = local.create_main_repository ? local.pipelines : {}
+
+  project_id = local.azure_devops_project_id
+  name       = each.value.name
+
+  ci_trigger {
+    use_yaml = true
+  }
+
+  repository {
+    repo_type   = "TfsGit"
+    repo_id     = azuredevops_git_repository.this[0].id
+    branch_name = azuredevops_git_repository.this[0].default_branch
+    yml_path    = each.value.file_path
+  }
+
+  # Ensure the repository files (including the pipeline YAML) exist before the
+  # build definitions are created, and - critically - that the build definitions
+  # are destroyed *before* those files are removed. On teardown the provider
+  # deletes each repository file with its own "Delete <file>" commit to the
+  # default branch. The generated CD pipeline triggers on pushes to that branch,
+  # so if the build definitions still existed, those teardown commits would queue
+  # pipeline runs that fail (the agent pool and variable groups are already gone).
+  # Destroying the build definitions first means there is nothing left to trigger.
+  depends_on = [azuredevops_git_repository_file.this]
+}
+
+resource "azuredevops_pipeline_authorization" "service_connection" {
+  for_each = local.create_main_repository ? local.pipelines_by_service_connection : {}
+
+  project_id  = local.azure_devops_project_id
+  resource_id = azuredevops_serviceendpoint_azurerm.this[each.value.service_connection].id
+  type        = "endpoint"
+  pipeline_id = azuredevops_build_definition.this[each.value.pipeline].id
+}
+
+resource "azuredevops_pipeline_authorization" "environment" {
+  for_each = local.create_main_repository ? local.pipelines_by_environment : {}
+
+  project_id  = local.azure_devops_project_id
+  resource_id = azuredevops_environment.this[each.value.environment].id
+  type        = "environment"
+  pipeline_id = azuredevops_build_definition.this[each.value.pipeline].id
+}
+
+resource "azuredevops_pipeline_authorization" "agent_pool" {
+  for_each = local.create_main_repository && local.create_agent_infrastructure ? local.pipelines : {}
+
+  project_id  = local.azure_devops_project_id
+  resource_id = azuredevops_agent_queue.this[0].id
+  type        = "queue"
+  pipeline_id = azuredevops_build_definition.this[each.key].id
+}

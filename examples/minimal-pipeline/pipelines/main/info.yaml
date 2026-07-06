@@ -1,0 +1,34 @@
+---
+trigger:
+  - none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: AzureCLI@2
+    displayName: 'Create Resource Group'
+    inputs:
+      azureSubscription: ${environments[keys(environments)[0]].service_connection_name_write}
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        Write-Host "=== Environment Info ==="
+        Write-Host "Pipeline: $(Build.DefinitionName)"
+        Write-Host "Repository: $(Build.Repository.Name)"
+        Write-Host "Branch: $(Build.SourceBranch)"
+        Write-Host ""
+        Write-Host "=== Azure Connection ==="
+        $account = az account show | ConvertFrom-Json
+        Write-Host "Subscription: $($account.name) ($($account.id))"
+        Write-Host "Tenant: $($account.tenantId)"
+        Write-Host ""
+        Write-Host "=== Creating Resource Group ==="
+        $rgName = "rg-minimal-pipeline-example"
+        $location = "uksouth"
+        az group create --name $rgName --location $location
+        Write-Host "Resource group '$rgName' created in '$location'"
+        Write-Host ""
+        Write-Host "=== Cleaning Up ==="
+        az group delete --name $rgName --yes --no-wait
+        Write-Host "Resource group '$rgName' deletion initiated"

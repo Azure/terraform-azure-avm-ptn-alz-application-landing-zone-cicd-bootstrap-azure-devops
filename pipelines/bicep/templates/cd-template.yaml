@@ -1,0 +1,115 @@
+---
+parameters:
+  - name: bicep_action
+    default: 'deploy'
+  - name: environment
+    default: All
+  - name: environments
+    type: object
+    default: []
+  - name: deployments
+    type: object
+    default: []
+  - name: root_module_folder_relative_path
+    default: '.'
+  - name: bicep_cli_version
+    default: 'latest'
+
+stages:
+- ${{ each environment in parameters.environments }}:
+  - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
+    - stage: ${{ environment.name }}_what_if
+      displayName: ${{ environment.display_name }} What-If
+      variables:
+        - group: ${{ environment.variable_group_name }}
+      jobs:
+        - deployment: what_if
+          displayName: What-If with Deployment Stacks
+          pool:
+            ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
+              name: ${{ environment.agent_pool_name }}
+            ${{ if eq(environment.agent_pool_type, 'microsoft-hosted') }}:
+              vmImage: ${{ environment.agent_pool_name }}
+          environment: ${{ environment.environment_name }}
+          timeoutInMinutes: 0
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    displayName: Checkout Bicep Module
+                  - ${{ each deployment in parameters.deployments }}:
+                    - task: AzureCLI@2
+                      displayName: 'What-If - ${{ deployment.name }}'
+                      inputs:
+                        azureSubscription: ${{ environment.service_connection_name_read }}
+                        scriptType: pscore
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          $scope = "${{ coalesce(deployment.scope, 'group') }}"
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
+                          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+                          switch($scope) {
+                            "group" { $arguments += @("--resource-group", "${{ deployment.resource_group }}", "--name", "${{ deployment.name }}") }
+                            "sub"   { $arguments += @("--location", "${{ deployment.location }}", "--name", "${{ deployment.name }}") }
+                            "mg"    { $arguments += @("--location", "${{ deployment.location }}", "--management-group-id", "${{ deployment.management_group_id }}", "--name", "${{ deployment.name }}") }
+                          }
+
+                          $arguments += @("--template-file", $templateFile)
+                          $paramsFile = "${{ deployment.parameters_file }}"
+                          if($paramsFile -ne "") {
+                            $arguments += @("--parameters", "@${{ parameters.root_module_folder_relative_path }}/$paramsFile")
+                          }
+                          $arguments += "--what-if"
+                          Write-Host "Running: az $arguments"
+                          az @arguments
+                          if($LASTEXITCODE -ne 0) { throw "What-If failed for: ${{ deployment.name }}" }
+
+  - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
+    - stage: ${{ environment.name }}_deploy
+      displayName: ${{ environment.display_name }} Deploy
+      variables:
+        - group: ${{ environment.variable_group_name }}
+      jobs:
+        - deployment: deploy
+          displayName: Deploy with Deployment Stacks
+          pool:
+            ${{ if eq(environment.agent_pool_type, 'self-hosted') }}:
+              name: ${{ environment.agent_pool_name }}
+            ${{ if eq(environment.agent_pool_type, 'microsoft-hosted') }}:
+              vmImage: ${{ environment.agent_pool_name }}
+          environment: ${{ environment.environment_name }}
+          timeoutInMinutes: 0
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - checkout: self
+                    displayName: Checkout Bicep Module
+                  - ${{ each deployment in parameters.deployments }}:
+                    - task: AzureCLI@2
+                      displayName: 'Deploy - ${{ deployment.name }}'
+                      inputs:
+                        azureSubscription: ${{ environment.service_connection_name_write }}
+                        scriptType: pscore
+                        scriptLocation: inlineScript
+                        inlineScript: |
+                          $scope = "${{ coalesce(deployment.scope, 'group') }}"
+                          $templateFile = "${{ parameters.root_module_folder_relative_path }}/${{ deployment.template_file }}"
+                          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+                          switch($scope) {
+                            "group" { $arguments += @("--resource-group", "${{ deployment.resource_group }}", "--name", "${{ deployment.name }}") }
+                            "sub"   { $arguments += @("--location", "${{ deployment.location }}", "--name", "${{ deployment.name }}") }
+                            "mg"    { $arguments += @("--location", "${{ deployment.location }}", "--management-group-id", "${{ deployment.management_group_id }}", "--name", "${{ deployment.name }}") }
+                          }
+
+                          $arguments += @("--template-file", $templateFile)
+                          $paramsFile = "${{ deployment.parameters_file }}"
+                          if($paramsFile -ne "") {
+                            $arguments += @("--parameters", "@${{ parameters.root_module_folder_relative_path }}/$paramsFile")
+                          }
+                          Write-Host "Running: az $arguments"
+                          az @arguments
+                          if($LASTEXITCODE -ne 0) { throw "Deploy failed for: ${{ deployment.name }}" }

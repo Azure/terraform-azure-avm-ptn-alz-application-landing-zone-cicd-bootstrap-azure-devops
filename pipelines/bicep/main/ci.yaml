@@ -1,0 +1,45 @@
+---
+trigger:
+  - none
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: ${project_name}/${repository_name_templates}
+
+parameters:
+  - name: bicep_cli_version
+    displayName: Bicep CLI Version
+    type: string
+    default: 'latest'
+
+lockBehavior: sequential
+
+extends:
+  template: ${pipelines["ci"].template_path}@templates
+  parameters:
+    root_module_folder_relative_path: ${root_module_folder_relative_path}
+    bicep_cli_version: $${{ coalesce(parameters.bicep_cli_version, 'latest') }}
+    deployments:
+%{ for deployment in deployments ~}
+      - name: ${deployment.name}
+        template_file: ${deployment.template_file}
+        parameters_file: ${try(deployment.parameters_file, "")}
+        scope: ${try(deployment.scope, "group")}
+        resource_group: ${try(deployment.resource_group, "")}
+        location: ${try(deployment.location, "")}
+        management_group_id: ${try(deployment.management_group_id, "")}
+%{ endfor ~}
+    environments:
+%{ for environment in environments ~}
+      - name: ${environment.name}
+        display_name: ${environment.display_name}
+        service_connection_name_read: ${environment.service_connection_name_read}
+        service_connection_name_write: ${environment.service_connection_name_write}
+        variable_group_name: ${environment.variable_group_name}
+        agent_pool_type: ${environment.agent_pool_type}
+        agent_pool_name: ${environment.agent_pool_name}
+        environment_name: ${environment.environment_name}
+        dependent_environment: ${environment.dependent_environment}
+%{ endfor ~}
