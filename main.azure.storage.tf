@@ -15,7 +15,7 @@ module "private_dns_zone_storage_account" {
 
 module "storage_account" {
   source  = "Azure/avm-res-storage-storageaccount/azurerm"
-  version = "0.6.8"
+  version = "0.7.4"
   count   = var.deployment_mode == "terraform" ? 1 : 0
 
   location                 = var.location
