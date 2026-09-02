@@ -25,11 +25,24 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 
 ### Azure resources
 
-- **Terraform state** — when `deployment_mode = "terraform"`, provisions a hardened storage account (private endpoint, no public access) for Terraform remote state per environment.
+- **Terraform state & plan storage** — when `deployment_mode = "terraform"`, provisions a hardened storage account (private endpoint, no public access) for Terraform remote state per environment, and, when `use_storage_account_for_plan = true` (the default), a dedicated `<env>-tfplan` container per environment for secure plan hand-off between the CD `plan` and `apply` stages.
 - **Networking** — provisions a virtual network with dedicated subnets for agents and private endpoints, or accepts a pre-existing VNet / subnets in BYO mode.
 - **Private DNS** — manages private DNS zones for private endpoints, with an opt-out (`azure_alz_platform_landing_zone_mode_enabled`) for ALZ platforms that manage DNS centrally via Azure Policy.
 - **Identity** — creates the per-environment UAMIs used by the service connections, plus (when `agent_authentication_method = "uami"`) the UAMI used by the agent pool.
 - **Resource groups** — creates dedicated resource groups for identity, state, agents, and networking (or reuses an existing VNet's resource group in BYO mode).
+
+### Secure Terraform plan hand-off
+
+- **Default-secure** — `use_storage_account_for_plan = true` by default. The CD `plan` stage uploads the binary plan to a per-environment Blob container (`<env>-tfplan`) instead of bundling it into the Azure Pipelines artifact; the `apply` stage downloads the exact same blob by build ID and deletes it after a successful apply.
+- **Legacy fallback** — set `use_storage_account_for_plan = false` to revert to shipping the plan inside the Azure Pipelines build artifact. This is less secure (plan contents can include sensitive values and are retained per your organization's pipeline artifact retention policy) and is provided only for compatibility with self-managed/BYO template repos that haven't adopted the new templates.
+- **Custom template repositories are not auto-secured** — if you set `azuredevops_existing_template_repository_name` or a custom pipeline template path, the module does not modify your pipeline YAML. You must adopt the upload/download/delete steps yourself for storage-backed hand-off to apply.
+- **`show_plan_in_pipeline_logs`** — defaults to `false`. Enabling it prints the full plan to the pipeline log, visible to anyone with read access to the project/pipeline runs. Only enable if your organization has explicitly accepted that exposure.
+- **`plan_storage_retention_days`** (default `7`) — a storage lifecycle policy rule deletes abandoned plan blobs, snapshots, and previous versions after this many days. This is a backstop only; successful applies delete their own plan blob immediately.
+- **Recoverability** — the plan container inherits the storage account's blob versioning/soft-delete settings, so an accidentally-deleted plan blob may still be recoverable within your soft-delete window.
+- **Trusted-admin threat boundary** — this feature keeps plan contents out of Azure Pipelines artifact storage. It does not protect against an Azure user with Storage Blob Data Contributor/Owner-equivalent access to the storage account — the same trust boundary as Terraform remote state.
+- **Stale/concurrent plans** — the `apply` stage always downloads the blob written by its own `plan` stage run (keyed by `$(Build.BuildId)`), never "the latest" blob, so a concurrent or superseded run cannot apply a stranger's plan.
+- **Non-retroactive upgrade** — enabling this on an existing deployment only takes effect for the next `plan`/`apply` cycle; it does not migrate plans already in flight.
+- **Upgrading an existing storage account** — `storage_management_policy_rule` replaces the account's *entire* lifecycle policy, not just this module's rules. If you already manage that storage account's lifecycle policy outside this module, applying this upgrade will silently overwrite those rules. Before upgrading, check existing rules with `az storage account management-policy show` and fold them into your Terraform config first.
 
 ## Authentication required to use the module
 
