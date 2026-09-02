@@ -39,7 +39,7 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 - **Legacy fallback** — set `use_storage_account_for_plan = false` to revert to shipping the plan inside the Azure Pipelines build artifact. This is less secure (plan contents can include sensitive values and are retained per your organization's pipeline artifact retention policy) and is provided only for compatibility with self-managed/BYO template repos that haven't adopted the new templates.
 - **Custom template repositories are not auto-secured** — if you set `azuredevops_existing_template_repository_name` or a custom pipeline template path, the module does not modify your pipeline YAML. You must adopt the upload/download/delete steps yourself for storage-backed hand-off to apply.
 - **`show_plan_in_pipeline_logs`** — defaults to `false`. Enabling it prints the full plan to the pipeline log, visible to anyone with read access to the project/pipeline runs. Only enable if your organization has explicitly accepted that exposure.
-- **`plan_storage_retention_days`** (default `7`) — a storage lifecycle policy rule deletes abandoned plan blobs, snapshots, and previous versions after this many days. This is a backstop only; successful applies delete their own plan blob immediately.
+- **`plan_storage_retention_days`** (default `7`) — a storage lifecycle policy rule deletes abandoned plan blobs, snapshots, and previous versions after this many days. This is a backstop only; successful applies delete their own plan blob immediately. Choose a value longer than the longest expected plan-to-apply approval wait; if a plan expires before approval, rerun the pipeline to generate a fresh plan.
 - **Recoverability** — the plan container inherits the storage account's blob versioning/soft-delete settings, so an accidentally-deleted plan blob may still be recoverable within your soft-delete window.
 - **Trusted-admin threat boundary** — this feature keeps plan contents out of Azure Pipelines artifact storage. It does not protect against an Azure user with Storage Blob Data Contributor/Owner-equivalent access to the storage account — the same trust boundary as Terraform remote state.
 - **Stale/concurrent plans** — the `apply` stage always downloads the blob written by its own `plan` stage run (keyed by `$(Build.BuildId)`), never "the latest" blob, so a concurrent or superseded run cannot apply a stranger's plan.
@@ -470,7 +470,7 @@ Default: `null`
 
 ### <a name="input_plan_storage_retention_days"></a> [plan\_storage\_retention\_days](#input\_plan\_storage\_retention\_days)
 
-Description: The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion.
+Description: The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion. Choose a value longer than the longest expected plan-to-apply approval wait; expired plans must be regenerated.
 
 Type: `number`
 

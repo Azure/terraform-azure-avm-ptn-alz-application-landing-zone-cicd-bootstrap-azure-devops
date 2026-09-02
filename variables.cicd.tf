@@ -93,7 +93,7 @@ variable "example_module_path" {
 variable "plan_storage_retention_days" {
   type        = number
   default     = 7
-  description = "The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion."
+  description = "The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion. Choose a value longer than the longest expected plan-to-apply approval wait; expired plans must be regenerated."
 
   validation {
     condition     = var.plan_storage_retention_days > 0 && floor(var.plan_storage_retention_days) == var.plan_storage_retention_days
