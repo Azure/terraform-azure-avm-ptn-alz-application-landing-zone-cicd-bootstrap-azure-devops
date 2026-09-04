@@ -22,7 +22,7 @@ locals {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.17.1"
+  version = "0.20.0"
   count   = local.create_vnet_infrastructure ? 1 : 0
 
   location      = var.location
