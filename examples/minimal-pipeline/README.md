@@ -55,8 +55,6 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
-  resource_name_workload = random_string.workload.result
-
   location                               = var.location
   agent_use_self_hosted                  = false
   azuredevops_create_template_repository = false
@@ -79,6 +77,7 @@ module "test" {
       }
     }
   }
+  resource_name_workload = random_string.workload.result
 }
 ```
 
