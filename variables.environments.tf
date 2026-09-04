@@ -83,4 +83,13 @@ DESCRIPTION
     condition     = alltrue([for k, v in var.environments : v.identities.read.enabled || v.identities.write.enabled])
     error_message = "Each environment must have at least one identity enabled (read or write)."
   }
+  validation {
+    condition = alltrue([
+      for k, v in var.environments : (
+        !(contains(coalesce(v.identities.read.allowed_template_keys, ["ci", "cd"]), "cd") && contains(coalesce(v.identities.write.allowed_template_keys, ["cd"]), "cd"))
+        || (v.identities.read.enabled && v.identities.write.enabled)
+      )
+    ])
+    error_message = "When the 'cd' workflow is configured to use both the read and write identities (bundled CD), both identities.read.enabled and identities.write.enabled must be true."
+  }
 }
