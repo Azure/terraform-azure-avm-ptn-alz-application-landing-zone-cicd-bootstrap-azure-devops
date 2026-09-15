@@ -89,3 +89,26 @@ variable "example_module_path" {
   default     = null
   description = "The absolute path to the example module to seed into the created repository."
 }
+
+variable "plan_storage_retention_days" {
+  type        = number
+  default     = 7
+  description = "The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion. Choose a value longer than the longest expected plan-to-apply approval wait; expired plans must be regenerated."
+
+  validation {
+    condition     = var.plan_storage_retention_days > 0 && floor(var.plan_storage_retention_days) == var.plan_storage_retention_days
+    error_message = "plan_storage_retention_days must be a positive whole number."
+  }
+}
+
+variable "show_plan_in_pipeline_logs" {
+  type        = bool
+  default     = false
+  description = "Whether to print the full Terraform plan in pipeline logs. Enabling this can expose sensitive values."
+}
+
+variable "use_storage_account_for_plan" {
+  type        = bool
+  default     = true
+  description = "Whether to use the Terraform state Storage Account for secure plan hand-off. Set to false to use the legacy CI/CD artifact hand-off."
+}
