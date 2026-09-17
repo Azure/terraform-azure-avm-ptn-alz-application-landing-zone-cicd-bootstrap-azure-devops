@@ -47,7 +47,7 @@ module "seed" {
   agent_container_instance_count         = 1
   azuredevops_create_main_repository     = false
   azuredevops_create_template_repository = false
-  enable_telemetry                       = var.enable_telemetry
+  enable_telemetry                       = false
   resource_name_environment              = local.seed_environment
   resource_name_workload                 = "byoa"
 }
@@ -59,7 +59,7 @@ module "test" {
   location                       = var.location
   agent_container_instance_count = 1
   agent_existing_pool_name       = module.seed.agent_pool_name
-  enable_telemetry               = var.enable_telemetry
+  enable_telemetry               = false
   example_module_path            = "${path.root}/../../example-repos/terraform"
   resource_name_environment      = local.byo_environment
   resource_name_workload         = "byoa"

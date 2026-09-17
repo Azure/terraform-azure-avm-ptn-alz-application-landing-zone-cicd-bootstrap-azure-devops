@@ -45,7 +45,7 @@ module "test" {
   location               = var.location
   agent_compute_type     = "azure_container_instance"
   agent_use_self_hosted  = true
-  enable_telemetry       = var.enable_telemetry
+  enable_telemetry       = false
   example_module_path    = "${path.root}/../../example-repos/terraform"
   resource_name_workload = random_string.workload.result
 }
