@@ -58,7 +58,8 @@ module "test" {
       template_path = "info-template.yaml"
     }
   }
-  deployment_mode = "other"
+  deployment_mode  = "other"
+  enable_telemetry = false
   environments = {
     dev = {
       display_order   = 1
