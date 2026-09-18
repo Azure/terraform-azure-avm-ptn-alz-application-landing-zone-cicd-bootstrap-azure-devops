@@ -52,7 +52,7 @@ module "test" {
   location               = var.location
   agent_compute_type     = "azure_container_instance"
   agent_use_self_hosted  = true
-  enable_telemetry       = false
+  enable_telemetry       = var.enable_telemetry
   example_module_path    = "${path.root}/../../example-repos/terraform"
   resource_name_workload = random_string.workload.result
 }
@@ -94,7 +94,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `true`
+Default: `false`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
