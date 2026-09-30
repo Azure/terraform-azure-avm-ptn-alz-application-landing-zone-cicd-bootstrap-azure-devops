@@ -1,6 +1,6 @@
 module "agents_user_assigned_managed_identity" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version = "0.5.0"
+  version = "0.5.1"
   count   = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   location            = var.location
