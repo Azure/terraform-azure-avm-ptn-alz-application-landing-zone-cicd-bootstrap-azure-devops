@@ -49,14 +49,13 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
+  location               = var.location
+  agent_compute_type     = "azure_container_app"
+  agent_use_self_hosted  = true
+  deployment_mode        = "bicep"
+  enable_telemetry       = var.enable_telemetry
+  example_module_path    = "${path.root}/../../example-repos/bicep"
   resource_name_workload = random_string.workload.result
-
-  location              = var.location
-  agent_compute_type    = "azure_container_app"
-  agent_use_self_hosted = true
-  deployment_mode       = "bicep"
-  enable_telemetry      = var.enable_telemetry
-  example_module_path   = "${path.root}/../../example-repos/bicep"
 }
 ```
 

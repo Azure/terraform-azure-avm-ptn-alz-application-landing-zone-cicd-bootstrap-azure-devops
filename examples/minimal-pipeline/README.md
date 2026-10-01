@@ -55,8 +55,6 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
-  resource_name_workload = random_string.workload.result
-
   location                               = var.location
   agent_use_self_hosted                  = false
   azuredevops_create_template_repository = false
@@ -67,7 +65,8 @@ module "test" {
       template_path = "info-template.yaml"
     }
   }
-  deployment_mode = "other"
+  deployment_mode  = "other"
+  enable_telemetry = var.enable_telemetry
   environments = {
     dev = {
       display_order   = 1
@@ -79,6 +78,7 @@ module "test" {
       }
     }
   }
+  resource_name_workload = random_string.workload.result
 }
 ```
 
@@ -112,6 +112,16 @@ No required inputs.
 ## Optional Inputs
 
 The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `true`
 
 ### <a name="input_location"></a> [location](#input\_location)
 

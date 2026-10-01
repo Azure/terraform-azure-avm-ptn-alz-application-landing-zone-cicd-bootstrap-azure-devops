@@ -37,12 +37,12 @@ module "seed" {
   source = "../../"
 
   location                               = var.location
+  agent_container_instance_count         = 1
   azuredevops_create_main_repository     = false
   azuredevops_create_template_repository = false
   enable_telemetry                       = var.enable_telemetry
   resource_name_environment              = local.seed_environment
   resource_name_workload                 = "byoa"
-  agent_container_instance_count         = 1
 }
 
 # BYO deployment: consume the agent pool from the seed module.
@@ -50,10 +50,10 @@ module "test" {
   source = "../../"
 
   location                       = var.location
+  agent_container_instance_count = 1
   agent_existing_pool_name       = module.seed.agent_pool_name
   enable_telemetry               = var.enable_telemetry
   example_module_path            = "${path.root}/../../example-repos/terraform"
   resource_name_environment      = local.byo_environment
   resource_name_workload         = "byoa"
-  agent_container_instance_count = 1
 }

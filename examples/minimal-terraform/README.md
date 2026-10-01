@@ -49,11 +49,10 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
+  location               = var.location
+  enable_telemetry       = var.enable_telemetry
+  example_module_path    = "${path.root}/../../example-repos/terraform"
   resource_name_workload = random_string.workload.result
-
-  location            = var.location
-  enable_telemetry    = var.enable_telemetry
-  example_module_path = "${path.root}/../../example-repos/terraform"
 }
 ```
 

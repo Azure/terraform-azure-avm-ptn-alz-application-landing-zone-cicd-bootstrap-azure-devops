@@ -21,9 +21,6 @@ resource "azapi_resource" "federated_identity_credential" {
       subject   = azuredevops_serviceendpoint_azurerm.this[each.key].workload_identity_federation_subject
     }
   }
-  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
   # Azure serialises federated identity credential writes per managed identity. When several
   # credentials are created for the same user-assigned identity in parallel (Terraform's default
   # concurrency), Azure returns a 409 "ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity".
@@ -32,7 +29,6 @@ resource "azapi_resource" "federated_identity_credential" {
   retry = {
     error_message_regex = ["ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity"]
   }
-  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 
   # Ensure the federated identity credential is destroyed (and given time to propagate out of Entra)
   # before the backing Azure DevOps service connection is deleted. See time_sleep below.

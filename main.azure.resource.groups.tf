@@ -75,8 +75,4 @@ resource "azapi_resource" "role_assignment" {
       roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "/subscriptions/${each.value.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${module.role_definitions.role_definition_rolename_to_name[each.value.role_definition_id_or_name]}"
     }
   }
-  create_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  delete_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  read_headers   = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
-  update_headers = var.enable_telemetry ? { "User-Agent" : local.avm_azapi_header } : null
 }
