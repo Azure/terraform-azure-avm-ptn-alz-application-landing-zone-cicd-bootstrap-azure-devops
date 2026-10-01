@@ -32,9 +32,10 @@ steps:
         $arguments += "-chdir=${{ parameters.root_module_folder_relative_path }}"
         $arguments += "apply"
         $arguments += "-auto-approve"
-        $arguments += "tfplan"
+        $arguments += $env:ALZ_PLAN_FILE
         Write-Host "Running: $command $arguments"
         & $command $arguments
 
     env:
       ARM_OIDC_REQUEST_TOKEN: $(System.AccessToken)
+      ALZ_PLAN_FILE: $(alzPlanDir)/tfplan
