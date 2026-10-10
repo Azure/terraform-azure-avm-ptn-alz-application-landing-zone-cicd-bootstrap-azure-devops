@@ -570,13 +570,13 @@ The following Modules are called:
 
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
-Version: 0.5.0
+Version: 0.5.1
 
 ### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
 
 Source: Azure/avm-ptn-cicd-agents-and-runners/azurerm
 
-Version: 0.6.0
+Version: 0.6.1
 
 ### <a name="module_ip_addresses"></a> [ip\_addresses](#module\_ip\_addresses)
 
@@ -600,13 +600,13 @@ Version: 0.12.0
 
 Source: Azure/avm-res-resources-resourcegroup/azurerm
 
-Version: 0.2.2
+Version: 0.4.0
 
 ### <a name="module_resource_group_environments"></a> [resource\_group\_environments](#module\_resource\_group\_environments)
 
 Source: Azure/avm-res-resources-resourcegroup/azurerm
 
-Version: 0.2.2
+Version: 0.4.0
 
 ### <a name="module_role_definitions"></a> [role\_definitions](#module\_role\_definitions)
 
@@ -618,19 +618,19 @@ Version: 0.3.0
 
 Source: Azure/avm-res-storage-storageaccount/azurerm
 
-Version: 0.6.8
+Version: 0.7.4
 
 ### <a name="module_user_assigned_managed_identity"></a> [user\_assigned\_managed\_identity](#module\_user\_assigned\_managed\_identity)
 
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
-Version: 0.5.0
+Version: 0.5.1
 
 ### <a name="module_virtual_network"></a> [virtual\_network](#module\_virtual\_network)
 
 Source: Azure/avm-res-network-virtualnetwork/azurerm
 
-Version: 0.17.1
+Version: 0.20.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
