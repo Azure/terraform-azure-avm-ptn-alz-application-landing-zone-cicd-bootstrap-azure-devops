@@ -29,6 +29,22 @@ resource "azuredevops_variable_group" "this" {
     name  = "BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME"
     value = each.key
   }
+  variable {
+    name  = "USE_STORAGE_ACCOUNT_FOR_PLAN"
+    value = var.use_storage_account_for_plan ? "true" : "false"
+  }
+  variable {
+    name  = "SHOW_PLAN_IN_PIPELINE_LOGS"
+    value = var.show_plan_in_pipeline_logs ? "true" : "false"
+  }
+  dynamic "variable" {
+    for_each = var.use_storage_account_for_plan && contains(keys(local.plan_storage_container_names), each.key) ? [1] : []
+
+    content {
+      name  = "PLAN_STORAGE_CONTAINER_NAME"
+      value = local.plan_storage_container_names[each.key]
+    }
+  }
 }
 
 resource "azuredevops_variable_group" "bicep" {
