@@ -86,7 +86,8 @@ DESCRIPTION
   validation {
     condition = alltrue([
       for k, v in var.environments : (
-        !(contains(coalesce(v.identities.read.allowed_template_keys, ["ci", "cd"]), "cd") && contains(coalesce(v.identities.write.allowed_template_keys, ["cd"]), "cd"))
+        !contains(keys(local.effective_pipelines), "cd")
+        || !(contains(coalesce(v.identities.read.allowed_template_keys, ["ci", "cd"]), "cd") && contains(coalesce(v.identities.write.allowed_template_keys, ["cd"]), "cd"))
         || (v.identities.read.enabled && v.identities.write.enabled)
       )
     ])
