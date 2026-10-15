@@ -15,12 +15,11 @@ module "private_dns_zone_storage_account" {
 
 module "storage_account" {
   source  = "Azure/avm-res-storage-storageaccount/azurerm"
-  version = "0.6.8"
+  version = "0.7.4"
   count   = var.deployment_mode == "terraform" ? 1 : 0
 
   location                 = var.location
   name                     = local.resource_names.storage_account_name
-  resource_group_name      = module.resource_group["state"].name
   account_replication_type = "ZRS"
   account_tier             = "Standard"
   containers = { for env_key, env_value in local.environments : env_key => {
@@ -42,4 +41,5 @@ module "storage_account" {
   } : {}
   private_endpoints_manage_dns_zone_group = !var.azure_alz_platform_landing_zone_mode_enabled
   public_network_access_enabled           = !local.use_private_networking
+  resource_group_name                     = module.resource_group["state"].name
 }
