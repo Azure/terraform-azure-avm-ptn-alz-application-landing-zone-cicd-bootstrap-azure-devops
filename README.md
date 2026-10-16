@@ -77,8 +77,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
-- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
-
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 - <a name="requirement_time"></a> [time](#requirement\_time) (~> 0.9)
@@ -89,6 +87,7 @@ The following resources are used by this module:
 
 - [azapi_resource.federated_identity_credential](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.role_assignment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azuredevops_agent_pool.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_pool) (resource)
 - [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/agent_queue) (resource)
 - [azuredevops_branch_policy_build_validation.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/branch_policy_build_validation) (resource)
@@ -117,10 +116,9 @@ The following resources are used by this module:
 - [azuredevops_serviceendpoint_azurerm.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/serviceendpoint_azurerm) (resource)
 - [azuredevops_variable_group.bicep](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/variable_group) (resource)
 - [azuredevops_variable_group.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/variable_group) (resource)
-- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_string.unique_name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
-- [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [terraform_data.plan_storage_container_validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
+- [terraform_data.telemetry](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 - [time_sleep.agents_user_assigned_managed_identity_propagation](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [time_sleep.service_connection_teardown](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) (resource)
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
@@ -129,7 +127,6 @@ The following resources are used by this module:
 - [azuredevops_client_config.current](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/client_config) (data source)
 - [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/project) (data source)
 - [azuredevops_users.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/users) (data source)
-- [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
