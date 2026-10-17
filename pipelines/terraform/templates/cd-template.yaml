@@ -38,6 +38,9 @@ stages:
                   - template: helpers/terraform-installer.yaml
                     parameters:
                       terraformVersion: ${{ parameters.terraform_cli_version }}
+                  - template: helpers/terraform-plan-workspace.yaml
+                    parameters:
+                      purpose: 'plan'
                   - template: helpers/terraform-init.yaml
                     parameters:
                       serviceConnection: ${{ environment.service_connection_name_read }}
@@ -52,6 +55,18 @@ stages:
                       root_module_folder_relative_path: ${{ parameters.root_module_folder_relative_path }}
                       additionalVariables: $(ADDITIONAL_ENVIRONMENT_VARIABLES)
                       varFilePath: $(VAR_FILE_PATH)
+                  - pwsh: |
+                      terraform `
+                      -chdir="${{ parameters.root_module_folder_relative_path }}" `
+                      show `
+                      "$(alzPlanDir)/tfplan"
+                    displayName: Show the Plan for Review
+                    condition: and(succeeded(), eq(variables['SHOW_PLAN_IN_PIPELINE_LOGS'], 'true'))
+                  - template: helpers/terraform-plan-upload.yaml
+                    parameters:
+                      serviceConnection: ${{ environment.service_connection_name_read }}
+                  # The plan file lives in the agent temp directory, so it is structurally absent from the
+                  # sources directory this artifact is built from (Azure/Azure-Landing-Zones#4174).
                   - task: CopyFiles@2
                     displayName: Create Module Artifact
                     inputs:
@@ -64,21 +79,31 @@ stages:
                         !**/.terraform/**/*
                         !**/.git/**/*
                         !**/.pipelines/**/*
-                      TargetFolder: '$(Build.ArtifactsStagingDirectory)'
+                        !**/tfplan
+                        !**/tfplan.json
+                      TargetFolder: '$(Build.ArtifactStagingDirectory)'
                       CleanTargetFolder: true
                       OverWrite: true
+                  - pwsh: |
+                      # Legacy behaviour: hand the plan off inside the pipeline artifact, where anyone with
+                      # pipeline read access can download it. Only reached when the storage hand-off is
+                      # explicitly disabled. The plan must land at the same root-module-relative path the
+                      # apply stage reads it back from, which is not necessarily the artifact root.
+                      $destinationFolder = Join-Path $env:ALZ_STAGING_DIR "${{ parameters.root_module_folder_relative_path }}"
+                      New-Item -Path $destinationFolder -ItemType Directory -Force | Out-Null
+                      Copy-Item -Path "$(alzPlanDir)/tfplan" -Destination (Join-Path $destinationFolder "tfplan") -Force
+                      Write-Host "##vso[task.logissue type=warning]USE_STORAGE_ACCOUNT_FOR_PLAN is not 'true', so the Terraform plan file is published inside the pipeline artifact and is readable by anyone with pipeline read access."
+                    displayName: Add Plan to Module Artifact
+                    condition: and(succeeded(), ne(variables['USE_STORAGE_ACCOUNT_FOR_PLAN'], 'true'))
+                    env:
+                      ALZ_STAGING_DIR: $(Build.ArtifactStagingDirectory)
                   - task: PublishPipelineArtifact@1
                     displayName: Publish Module Artifact
                     inputs:
-                      targetPath: '$(Build.ArtifactsStagingDirectory)'
+                      targetPath: '$(Build.ArtifactStagingDirectory)'
                       artifact: 'module_${{ environment.name }}'
                       publishLocation: 'pipeline'
-                  - pwsh: |
-                      terraform `
-                      -chdir="${{ parameters.root_module_folder_relative_path }}" `
-                      show `
-                      tfplan
-                    displayName: Show the Plan for Review
+                  - template: helpers/terraform-plan-cleanup.yaml
 
   - ${{ if or(eq(environment.name, parameters.environment), eq(parameters.environment, 'All')) }}:
     - stage: ${{ environment.name }}_apply
@@ -109,6 +134,22 @@ stages:
                   - template: helpers/terraform-installer.yaml
                     parameters:
                       terraformVersion: ${{ parameters.terraform_cli_version }}
+                  - template: helpers/terraform-plan-workspace.yaml
+                    parameters:
+                      purpose: 'apply'
+                  - pwsh: |
+                      # Legacy fallback: the plan travelled inside the module artifact. Copy it into the
+                      # same agent-temp working directory the storage hand-off would have used, so the
+                      # apply step below always reads from one place regardless of which path was taken.
+                      $legacyPlanFile = Join-Path "$(Build.SourcesDirectory)/${{ parameters.root_module_folder_relative_path }}" "tfplan"
+                      Copy-Item -Path $legacyPlanFile -Destination (Join-Path $env:ALZ_PLAN_DIR "tfplan") -Force
+                    displayName: Stage Legacy Plan from Artifact
+                    condition: and(succeeded(), ne(variables['USE_STORAGE_ACCOUNT_FOR_PLAN'], 'true'))
+                    env:
+                      ALZ_PLAN_DIR: $(alzPlanDir)
+                  - template: helpers/terraform-plan-download.yaml
+                    parameters:
+                      serviceConnection: ${{ environment.service_connection_name_write }}
                   - template: helpers/terraform-init.yaml
                     parameters:
                       serviceConnection: ${{ environment.service_connection_name_write }}
@@ -121,3 +162,9 @@ stages:
                       terraform_action: ${{ parameters.terraform_action }}
                       serviceConnection: ${{ environment.service_connection_name_write }}
                       root_module_folder_relative_path: ${{ parameters.root_module_folder_relative_path }}
+                  # Best-effort immediate cleanup on the happy path only. A failed apply deliberately leaves
+                  # the blob in place; the container lifecycle policy is the guaranteed eventual cleanup.
+                  - template: helpers/terraform-plan-delete.yaml
+                    parameters:
+                      serviceConnection: ${{ environment.service_connection_name_write }}
+                  - template: helpers/terraform-plan-cleanup.yaml
