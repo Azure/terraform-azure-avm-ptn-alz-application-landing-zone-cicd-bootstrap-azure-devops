@@ -18,12 +18,16 @@ data "azapi_resource_action" "subscription" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.12.0"
+  version = "0.13.0"
+
+  location         = var.location
+  enable_telemetry = var.enable_telemetry
 }
 
 module "role_definitions" {
-  source  = "Azure/avm-utl-roledefinitions/azure"
-  version = "0.3.0"
+  source    = "Azure/avm-utl-roledefinitions/azure"
+  version   = "0.3.0"
+  providers = { modtm = modtm }
 
   enable_telemetry = var.enable_telemetry
 }
