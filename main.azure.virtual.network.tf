@@ -1,7 +1,8 @@
 module "ip_addresses" {
-  source  = "Azure/avm-utl-network-ip-addresses/azurerm"
-  version = "0.1.1"
-  count   = local.create_vnet_infrastructure ? 1 : 0
+  source    = "Azure/avm-utl-network-ip-addresses/azurerm"
+  version   = "0.1.1"
+  providers = { modtm = modtm }
+  count     = local.create_vnet_infrastructure ? 1 : 0
 
   address_prefixes = var.azure_subnets_and_sizes
   address_space    = var.azure_address_space
@@ -21,9 +22,10 @@ locals {
 }
 
 module "virtual_network" {
-  source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.17.1"
-  count   = local.create_vnet_infrastructure ? 1 : 0
+  source    = "Azure/avm-res-network-virtualnetwork/azurerm"
+  version   = "0.17.1"
+  providers = { modtm = modtm }
+  count     = local.create_vnet_infrastructure ? 1 : 0
 
   location      = var.location
   parent_id     = module.resource_group["agents"].resource_id

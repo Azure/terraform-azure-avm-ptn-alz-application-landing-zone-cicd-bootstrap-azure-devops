@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.9"
+      version = "~> 2.12"
     }
     azuredevops = {
       source  = "microsoft/azuredevops"
@@ -13,6 +13,10 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -47,6 +51,10 @@ resource "random_string" "workload" {
 # Minimal example: single write identity, public agents, no template repo, custom pipeline
 module "test" {
   source = "../../"
+  providers = {
+    azapi = azapi
+    modtm = modtm
+  }
 
   location                               = var.location
   agent_use_self_hosted                  = false

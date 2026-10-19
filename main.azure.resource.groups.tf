@@ -21,18 +21,20 @@ locals {
 }
 
 module "resource_group" {
-  source   = "Azure/avm-res-resources-resourcegroup/azurerm"
-  version  = "0.2.2"
-  for_each = local.resource_groups
+  source    = "Azure/avm-res-resources-resourcegroup/azurerm"
+  version   = "0.2.2"
+  providers = { modtm = modtm }
+  for_each  = local.resource_groups
 
   location = var.location
   name     = each.value.name
 }
 
 module "resource_group_environments" {
-  source   = "Azure/avm-res-resources-resourcegroup/azurerm"
-  version  = "0.2.2"
-  for_each = local.environments_create_rg
+  source    = "Azure/avm-res-resources-resourcegroup/azurerm"
+  version   = "0.2.2"
+  providers = { modtm = modtm }
+  for_each  = local.environments_create_rg
 
   location = var.location
   name     = each.value.resource_group_name
