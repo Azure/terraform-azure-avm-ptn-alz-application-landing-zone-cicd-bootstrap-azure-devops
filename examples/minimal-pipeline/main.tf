@@ -14,6 +14,7 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -51,10 +52,6 @@ resource "random_string" "workload" {
 # Minimal example: single write identity, public agents, no template repo, custom pipeline
 module "test" {
   source = "../../"
-  providers = {
-    azapi = azapi
-    modtm = modtm
-  }
 
   location                               = var.location
   agent_use_self_hosted                  = false

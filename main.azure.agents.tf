@@ -1,8 +1,7 @@
 module "azure_devops_agents" {
-  source    = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
-  version   = "0.6.0"
-  providers = { modtm = modtm }
-  count     = local.create_agent_infrastructure ? 1 : 0
+  source  = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
+  version = "0.6.0"
+  count   = local.create_agent_infrastructure ? 1 : 0
 
   location                                        = var.location
   postfix                                         = local.resource_names.agent_compute_postfix_name
