@@ -1,8 +1,7 @@
 module "user_assigned_managed_identity" {
-  source    = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
-  version   = "0.5.0"
-  providers = { modtm = modtm }
-  for_each  = local.environment_split
+  source   = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
+  version  = "0.5.0"
+  for_each = local.environment_split
 
   location            = var.location
   name                = each.value.user_assigned_managed_identity_name
