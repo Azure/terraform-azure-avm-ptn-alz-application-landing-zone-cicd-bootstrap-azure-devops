@@ -16,6 +16,10 @@ data "azapi_resource_action" "subscription" {
   response_export_values = ["displayName"]
 }
 
+data "azuread_service_principal" "devops_infra" {
+  display_name = "DevOpsInfrastructure"
+}
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.13.0"
