@@ -23,6 +23,6 @@ resource "azuredevops_agent_queue" "this" {
 }
 
 locals {
-  effective_agent_pool_id  = local.create_agent_container_instance_infrastructure ? azuredevops_agent_pool.this[0].id : module.azure_managed_devops_pool[0].resource_id
-  effective_agent_queue_id = local.create_agent_container_instance_infrastructure ? azuredevops_agent_queue.this[0].id : data.azuredevops_agent_queue.this[0].id
+  effective_agent_pool_id  = local.create_agent_container_instance_infrastructure ? azuredevops_agent_pool.this[0].id : (local.create_agent_managed_pool_infrastructure ? data.azuredevops_agent_queue.this[0].agent_pool_id : null)
+  effective_agent_queue_id = local.create_agent_container_instance_infrastructure ? azuredevops_agent_queue.this[0].id : (local.create_agent_managed_pool_infrastructure ? data.azuredevops_agent_queue.this[0].id : null)
 }

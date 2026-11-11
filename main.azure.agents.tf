@@ -57,4 +57,6 @@ module "azure_managed_devops_pool" {
     ]
   }
   subnet_id = local.effective_agents_subnet_id
+
+  depends_on = [module.virtual_network]
 }

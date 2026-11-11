@@ -23,4 +23,6 @@ resource "azapi_resource" "dev_center_project" {
       maxDevBoxesPerUser = 0
     }
   }
+  response_export_values = []
+  tags                   = var.tags
 }

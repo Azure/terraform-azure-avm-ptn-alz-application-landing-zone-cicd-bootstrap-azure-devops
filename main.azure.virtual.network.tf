@@ -48,6 +48,9 @@ module "virtual_network" {
       id = module.nat_gateway[0].resource_id
     } : null
   } }
+  timeouts = local.create_agent_managed_pool_infrastructure ? {
+    create = "5m"
+  } : {}
 }
 
 module "nat_gateway" {

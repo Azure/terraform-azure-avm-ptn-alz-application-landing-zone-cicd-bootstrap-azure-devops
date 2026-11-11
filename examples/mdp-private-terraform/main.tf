@@ -48,7 +48,7 @@ resource "random_string" "workload" {
   upper   = false
 }
 
-# ACA with private networking and Terraform pipelines
+# Managed DevOps Pool with private networking and Terraform pipelines
 module "test" {
   source = "../../"
 

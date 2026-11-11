@@ -1,3 +1,3 @@
-# ACA Private Networking with Terraform
+# Managed DevOps Pool Private Networking with Terraform
 
-This example deploys self-hosted agents using Azure Container Apps with private networking and Terraform pipelines.
+This example deploys agents using Azure Managed DevOps Pools with private networking and Terraform pipelines.

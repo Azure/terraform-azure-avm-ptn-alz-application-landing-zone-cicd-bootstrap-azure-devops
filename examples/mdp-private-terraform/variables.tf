@@ -10,6 +10,6 @@ DESCRIPTION
 
 variable "location" {
   type        = string
-  default     = "swedencentral"
+  default     = "uksouth"
   description = "The location/region where the resources will be created."
 }

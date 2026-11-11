@@ -68,7 +68,6 @@ variable "resource_name_templates" {
     dev_center_name                           = "dc-$${workload}-$${environment}-$${location_short}-$${sequence}"
     dev_center_project_name                   = "dcp-$${workload}-$${environment}-$${location_short}-$${sequence}"
     devops_agent_pool_name                    = "mdp-$${workload}-$${environment}"
-    nat_gateway_name                          = "nat-$${workload}-$${environment}-$${location}-$${sequence}"
   }
   description = "A map of resource name templates. Each template supports placeholders: $${workload}, $${environment}, $${location}, $${location_short}, $${sequence}, $${uniqueness}."
 }

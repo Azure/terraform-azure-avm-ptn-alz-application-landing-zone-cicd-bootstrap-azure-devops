@@ -1,7 +1,7 @@
 module "agents_user_assigned_managed_identity" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
   version = "0.5.0"
-  count   = local.create_agent_container_instance_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
+  count   = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   location            = var.location
   name                = local.resource_names.agent_user_assigned_managed_identity_name
@@ -9,7 +9,7 @@ module "agents_user_assigned_managed_identity" {
 }
 
 resource "time_sleep" "agents_user_assigned_managed_identity_propagation" {
-  count = local.create_agent_container_instance_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
+  count = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   create_duration = "30s"
   triggers = {
@@ -18,7 +18,7 @@ resource "time_sleep" "agents_user_assigned_managed_identity_propagation" {
 }
 
 resource "azuredevops_service_principal_entitlement" "agents_user_assigned_managed_identity" {
-  count = local.create_agent_container_instance_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
+  count = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   origin               = "aad"
   origin_id            = module.agents_user_assigned_managed_identity[0].principal_id
@@ -28,10 +28,10 @@ resource "azuredevops_service_principal_entitlement" "agents_user_assigned_manag
 }
 
 resource "azuredevops_securityrole_assignment" "agents_uami_pool_admin" {
-  count = local.create_agent_container_instance_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
+  count = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   scope       = "distributedtask.agentpoolrole"
-  resource_id = azuredevops_agent_pool.this[0].id
+  resource_id = local.effective_agent_pool_id
   role_name   = "Administrator"
   identity_id = azuredevops_service_principal_entitlement.agents_user_assigned_managed_identity[0].id
 }
