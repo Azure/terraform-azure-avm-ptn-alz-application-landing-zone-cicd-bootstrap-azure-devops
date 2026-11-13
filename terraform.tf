@@ -6,10 +6,6 @@ terraform {
       source  = "Azure/azapi"
       version = "~> 2.12"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.0"
-    }
     azuredevops = {
       source  = "microsoft/azuredevops"
       version = "~> 1.15"
@@ -18,6 +14,10 @@ terraform {
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
+    }
+    msgraph = {
+      source  = "microsoft/msgraph"
+      version = "~> 0.6"
     }
     random = {
       source  = "hashicorp/random"

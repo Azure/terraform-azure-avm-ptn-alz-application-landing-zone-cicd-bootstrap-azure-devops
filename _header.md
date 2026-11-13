@@ -33,13 +33,21 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 
 ## Authentication required to use the module
 
-The module talks to two control planes: **Azure Resource Manager** and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
+The module talks to three APIs: **Azure Resource Manager**, **Microsoft Graph**, and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
 
 ### Azure (`azurerm`, `azapi`) provider
 
 Recommended: **OIDC federation** via `ARM_USE_OIDC=true` plus `ARM_TENANT_ID`, `ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, and the OIDC token vars (`ARM_OIDC_REQUEST_TOKEN` / `ARM_OIDC_REQUEST_URL` in GitHub Actions, or equivalents in Azure DevOps). Service principal secret (`ARM_CLIENT_SECRET`) and `az login` are also supported.
 
 The identity must hold **Owner** on the target subscription (or sufficient Contributor + User Access Administrator) because the module assigns RBAC to the per-environment UAMIs.
+
+### Microsoft Graph (`msgraph`) provider
+
+The module uses `microsoft/msgraph` to look up the Microsoft Entra service principal named `DevOpsInfrastructure` and use its object ID for managed agent pool network role assignments. The lookup must return exactly one principal in the configured tenant.
+
+The provider supports the same `ARM_*` authentication variables, including OIDC via `ARM_USE_OIDC=true`, as well as service principal credentials and Azure CLI authentication. For application authentication, grant the deployment identity the Microsoft Graph **Application.Read.All** application permission with tenant administrator consent. Azure subscription RBAC alone does not grant Microsoft Graph access.
+
+Consumers previously configuring or passing an `azuread` provider for this module must replace it with `msgraph` and run `terraform init`. Only a data source is replaced; existing role assignments retain the same principal ID.
 
 ### Azure DevOps (`azuredevops`) provider
 

@@ -36,7 +36,7 @@ module "virtual_network" {
   role_assignments = {
     for role in local.devops_infrastructure_roles : role => {
       role_definition_id_or_name = role
-      principal_id               = data.azuread_service_principal.devops_infra.object_id
+      principal_id               = one(data.msgraph_resource.devops_infra.output.object_ids)
     }
   }
   subnets = { for subnet_key, subnet_address_space in local.subnets : subnet_key => {

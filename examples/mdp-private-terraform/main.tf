@@ -11,10 +11,6 @@ terraform {
       source  = "microsoft/azuredevops"
       version = "~> 1.15"
     }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
     # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
@@ -23,6 +19,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
+    }
+    msgraph = {
+      source  = "microsoft/msgraph"
+      version = "~> 0.6"
     }
   }
 }

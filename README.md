@@ -35,13 +35,21 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 
 ## Authentication required to use the module
 
-The module talks to two control planes: **Azure Resource Manager** and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
+The module talks to three APIs: **Azure Resource Manager**, **Microsoft Graph**, and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
 
 ### Azure (`azurerm`, `azapi`) provider
 
 Recommended: **OIDC federation** via `ARM_USE_OIDC=true` plus `ARM_TENANT_ID`, `ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, and the OIDC token vars (`ARM_OIDC_REQUEST_TOKEN` / `ARM_OIDC_REQUEST_URL` in GitHub Actions, or equivalents in Azure DevOps). Service principal secret (`ARM_CLIENT_SECRET`) and `az login` are also supported.
 
 The identity must hold **Owner** on the target subscription (or sufficient Contributor + User Access Administrator) because the module assigns RBAC to the per-environment UAMIs.
+
+### Microsoft Graph (`msgraph`) provider
+
+The module uses `microsoft/msgraph` to look up the Microsoft Entra service principal named `DevOpsInfrastructure` and use its object ID for managed agent pool network role assignments. The lookup must return exactly one principal in the configured tenant.
+
+The provider supports the same `ARM_*` authentication variables, including OIDC via `ARM_USE_OIDC=true`, as well as service principal credentials and Azure CLI authentication. For application authentication, grant the deployment identity the Microsoft Graph **Application.Read.All** application permission with tenant administrator consent. Azure subscription RBAC alone does not grant Microsoft Graph access.
+
+Consumers previously configuring or passing an `azuread` provider for this module must replace it with `msgraph` and run `terraform init`. Only a data source is replaced; existing role assignments retain the same principal ID.
 
 ### Azure DevOps (`azuredevops`) provider
 
@@ -62,11 +70,11 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.12)
 
-- <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (~> 2.0)
-
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+
+- <a name="requirement_msgraph"></a> [msgraph](#requirement\_msgraph) (~> 0.6)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -76,6 +84,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.azure_dev_center](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.dev_center_project](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.federated_identity_credential](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.role_assignment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
@@ -115,11 +124,11 @@ The following resources are used by this module:
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_resource_action.subscription](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
-- [azuread_service_principal.devops_infra](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/data-sources/service_principal) (data source)
 - [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/agent_queue) (data source)
 - [azuredevops_client_config.current](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/client_config) (data source)
 - [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/project) (data source)
 - [azuredevops_users.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/users) (data source)
+- [msgraph_resource.devops_infra](https://registry.terraform.io/providers/microsoft/msgraph/latest/docs/data-sources/resource) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -586,12 +595,6 @@ The following Modules are called:
 Source: Azure/avm-res-managedidentity-userassignedidentity/azurerm
 
 Version: 0.5.0
-
-### <a name="module_azure_dev_center"></a> [azure\_dev\_center](#module\_azure\_dev\_center)
-
-Source: Azure/avm-res-devcenter-devcenter/azurerm
-
-Version: 0.2.0
 
 ### <a name="module_azure_devops_agents"></a> [azure\_devops\_agents](#module\_azure\_devops\_agents)
 

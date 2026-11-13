@@ -18,10 +18,6 @@ terraform {
       source  = "microsoft/azuredevops"
       version = "~> 1.15"
     }
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
     # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
@@ -30,6 +26,10 @@ terraform {
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
+    }
+    msgraph = {
+      source  = "microsoft/msgraph"
+      version = "~> 0.6"
     }
   }
 }
@@ -79,9 +79,9 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azuredevops"></a> [azuredevops](#requirement\_azuredevops) (~> 1.15)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
-
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+
+- <a name="requirement_msgraph"></a> [msgraph](#requirement\_msgraph) (~> 0.6)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
