@@ -35,13 +35,21 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 
 ## Authentication required to use the module
 
-The module talks to two control planes: **Azure Resource Manager** and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
+The module talks to three APIs: **Azure Resource Manager**, **Microsoft Graph**, and **Azure DevOps**. Configure provider authentication via environment variables — the module itself does not accept any provider credentials as input variables.
 
 ### Azure (`azurerm`, `azapi`) provider
 
 Recommended: **OIDC federation** via `ARM_USE_OIDC=true` plus `ARM_TENANT_ID`, `ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, and the OIDC token vars (`ARM_OIDC_REQUEST_TOKEN` / `ARM_OIDC_REQUEST_URL` in GitHub Actions, or equivalents in Azure DevOps). Service principal secret (`ARM_CLIENT_SECRET`) and `az login` are also supported.
 
 The identity must hold **Owner** on the target subscription (or sufficient Contributor + User Access Administrator) because the module assigns RBAC to the per-environment UAMIs.
+
+### Microsoft Graph (`msgraph`) provider
+
+The module uses `microsoft/msgraph` to look up the Microsoft Entra service principal named `DevOpsInfrastructure` and use its object ID for managed agent pool network role assignments. The lookup must return exactly one principal in the configured tenant.
+
+The provider supports the same `ARM_*` authentication variables, including OIDC via `ARM_USE_OIDC=true`, as well as service principal credentials and Azure CLI authentication. For application authentication, grant the deployment identity the Microsoft Graph **Application.Read.All** application permission with tenant administrator consent. Azure subscription RBAC alone does not grant Microsoft Graph access.
+
+Consumers previously configuring or passing an `azuread` provider for this module must replace it with `msgraph` and run `terraform init`. Only a data source is replaced; existing role assignments retain the same principal ID.
 
 ### Azure DevOps (`azuredevops`) provider
 
@@ -66,6 +74,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
+- <a name="requirement_msgraph"></a> [msgraph](#requirement\_msgraph) (~> 0.6)
+
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 - <a name="requirement_time"></a> [time](#requirement\_time) (~> 0.9)
@@ -74,6 +84,8 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
+- [azapi_resource.azure_dev_center](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.dev_center_project](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.federated_identity_credential](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.role_assignment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
@@ -112,9 +124,11 @@ The following resources are used by this module:
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_resource_action.subscription](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
+- [azuredevops_agent_queue.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/agent_queue) (data source)
 - [azuredevops_client_config.current](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/client_config) (data source)
 - [azuredevops_project.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/project) (data source)
 - [azuredevops_users.this](https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/data-sources/users) (data source)
+- [msgraph_resource.devops_infra](https://registry.terraform.io/providers/microsoft/msgraph/latest/docs/data-sources/resource) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -141,7 +155,7 @@ Default: `"uami"`
 
 ### <a name="input_agent_compute_type"></a> [agent\_compute\_type](#input\_agent\_compute\_type)
 
-Description: The type of Azure compute to use for self-hosted agents. Must be either 'azure\_container\_app' or 'azure\_container\_instance'.
+Description: The type of Azure compute to use for self-hosted agents. Must be either 'azure\_container\_app', 'azure\_container\_instance', or 'azure\_devops\_managed\_pool'.
 
 Type: `string`
 
@@ -157,7 +171,7 @@ Default: `false`
 
 ### <a name="input_agent_container_instance_count"></a> [agent\_container\_instance\_count](#input\_agent\_container\_instance\_count)
 
-Description: The number of container instances to provision when `agent_compute_type` is 'azure\_container\_instance'. Ignored when `agent_compute_type` is 'azure\_container\_app'.
+Description: The number of container instances to provision when `agent_compute_type` is 'azure\_container\_instance'. Ignored when `agent_compute_type` is 'azure\_container\_app' or 'azure\_devops\_managed\_pool'.
 
 Type: `number`
 
@@ -214,6 +228,14 @@ Default: `false`
 ### <a name="input_azure_existing_agents_subnet_resource_id"></a> [azure\_existing\_agents\_subnet\_resource\_id](#input\_azure\_existing\_agents\_subnet\_resource\_id)
 
 Description: The resource ID of a pre-existing subnet for agents (BYO mode). The subnet must have the appropriate delegation for the chosen `agent_compute_type`.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_azure_existing_dev_center_project_resource_id"></a> [azure\_existing\_dev\_center\_project\_resource\_id](#input\_azure\_existing\_dev\_center\_project\_resource\_id)
+
+Description: The resource ID of a pre-existing Azure Dev Center project (BYO mode). When set, the module will not create a Dev Center project.
 
 Type: `string`
 
@@ -492,6 +514,9 @@ Default:
   "agent_user_assigned_managed_identity_name": "uami-${workload}-agents-${environment}-${location}-${sequence}",
   "container_instance_prefix_name": "aci-${workload}-${environment}-${location}",
   "container_registry_name": "acr${workload}${environment}${location_short}${sequence}${uniqueness}",
+  "dev_center_name": "dc-${workload}-${environment}-${location_short}-${sequence}",
+  "dev_center_project_name": "dcp-${workload}-${environment}-${location_short}-${sequence}",
+  "devops_agent_pool_name": "mdp-${workload}-${environment}",
   "federated_credential_name": "${workload}-${environment}",
   "group_name": "group-${workload}-${environment}-approvers",
   "identity_read_name": "uami-${workload}-${environment}-read-${location}-${sequence}",
@@ -577,11 +602,23 @@ Source: Azure/avm-ptn-cicd-agents-and-runners/azurerm
 
 Version: 0.6.0
 
+### <a name="module_azure_managed_devops_pool"></a> [azure\_managed\_devops\_pool](#module\_azure\_managed\_devops\_pool)
+
+Source: Azure/avm-res-devopsinfrastructure-pool/azurerm
+
+Version: 0.3.2
+
 ### <a name="module_ip_addresses"></a> [ip\_addresses](#module\_ip\_addresses)
 
 Source: Azure/avm-utl-network-ip-addresses/azurerm
 
 Version: 0.1.1
+
+### <a name="module_nat_gateway"></a> [nat\_gateway](#module\_nat\_gateway)
+
+Source: Azure/avm-res-network-natgateway/azurerm
+
+Version: 0.3.2
 
 ### <a name="module_private_dns_zone_storage_account"></a> [private\_dns\_zone\_storage\_account](#module\_private\_dns\_zone\_storage\_account)
 
