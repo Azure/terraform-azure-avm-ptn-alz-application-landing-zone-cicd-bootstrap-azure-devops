@@ -1,0 +1,27 @@
+---
+name: Plan Storage Contract Tests
+
+on:
+  pull_request:
+    paths:
+      - 'pipelines/terraform/templates/ci-template.yaml'
+      - 'pipelines/terraform/templates/cd-template.yaml'
+      - 'pipelines/terraform/templates/helpers/terraform-plan*.yaml'
+      - 'tests/contract/Test-PipelinePlanStorage.ps1'
+      - '.github/workflows/plan-storage-contract.yml'
+  workflow_dispatch:
+
+jobs:
+  contract:
+    name: Verify plan storage pipeline contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run contract tests
+        shell: pwsh
+        run: |
+          ./tests/contract/Test-PipelinePlanStorage.ps1
