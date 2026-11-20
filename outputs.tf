@@ -1,6 +1,6 @@
 output "agent_pool_name" {
   description = "The Azure DevOps agent pool name used by this deployment."
-  value       = var.agent_existing_pool_name != null ? var.agent_existing_pool_name : (local.create_agent_infrastructure ? azuredevops_agent_pool.this[0].name : null)
+  value       = local.effective_agent_pool_name
 }
 
 output "approvers" {
