@@ -63,6 +63,9 @@ stages:
                   - template: helpers/terraform-installer.yaml
                     parameters:
                       terraformVersion: ${{ parameters.terraform_cli_version }}
+                  - template: helpers/terraform-plan-workspace.yaml
+                    parameters:
+                      purpose: 'validate'
                   - template: helpers/terraform-init.yaml
                     parameters:
                       serviceConnection: ${{ environment.service_connection_name_read }}
@@ -77,8 +80,8 @@ stages:
                       additionalVariables: $(ADDITIONAL_ENVIRONMENT_VARIABLES)
                       varFilePath: $(VAR_FILE_PATH)
                   - pwsh: |
-                      terraform -chdir="${{ parameters.root_module_folder_relative_path }}" show -json tfplan > tfplan.json
-                      $planJson = Get-Content -Raw tfplan.json
+                      terraform -chdir="${{ parameters.root_module_folder_relative_path }}" show -json "$(alzPlanDir)/tfplan" > "$(alzPlanDir)/tfplan.json"
+                      $planJson = Get-Content -Raw "$(alzPlanDir)/tfplan.json"
                       $planObject = ConvertFrom-Json $planJson -Depth 100
 
                       $items = @{}
@@ -93,9 +96,7 @@ stages:
                       Write-Host "Plan Summary"
                       Write-Host (ConvertTo-Json $items -Depth 10)
                     displayName: Terraform Plan Summary
-                  - task: PublishPipelineArtifact@1
-                    displayName: Publish Plan Artifact
-                    inputs:
-                      targetPath: 'tfplan.json'
-                      artifact: 'plan_${{ environment.name }}'
-                      publishLocation: 'pipeline'
+                  # The plan (and its JSON rendering, which still embeds every resolved resource attribute)
+                  # is never published as a pipeline artifact - it is destroyed with the rest of the agent
+                  # temp directory below (Azure/Azure-Landing-Zones#4174).
+                  - template: helpers/terraform-plan-cleanup.yaml

@@ -13,4 +13,16 @@ locals {
   )
   has_approvers     = var.azuredevops_existing_approvers_group_origin_id != null || length(var.approvers) > 0
   has_template_repo = var.azuredevops_existing_template_repository_name != null || local.create_template_repository
+
+  plan_storage_container_backend_collisions = [
+    for container_name in values(local.plan_storage_container_names) : container_name
+    if contains(keys(local.environments), container_name)
+  ]
+  plan_storage_container_duplicate_names = [
+    for name in distinct(values(local.plan_storage_container_names)) : name
+    if length([for v in values(local.plan_storage_container_names) : v if v == name]) > 1
+  ]
+  plan_storage_container_names = var.deployment_mode == "terraform" && var.use_storage_account_for_plan ? { for env_key, env_value in local.environments : env_key => (
+    length(env_key) <= 56 ? "${env_key}-tfplan" : "tfplan-${substr(sha256(env_key), 0, 32)}"
+  ) } : {}
 }
