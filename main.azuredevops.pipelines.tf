@@ -76,7 +76,7 @@ resource "azuredevops_pipeline_authorization" "agent_pool" {
   for_each = local.create_main_repository && local.create_agent_infrastructure ? local.pipelines : {}
 
   project_id  = local.azure_devops_project_id
-  resource_id = azuredevops_agent_queue.this[0].id
+  resource_id = local.effective_agent_queue_id
   type        = "queue"
   pipeline_id = azuredevops_build_definition.this[each.key].id
 }

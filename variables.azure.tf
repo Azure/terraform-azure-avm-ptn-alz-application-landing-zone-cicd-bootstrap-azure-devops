@@ -12,11 +12,11 @@ variable "agent_authentication_method" {
 variable "agent_compute_type" {
   type        = string
   default     = "azure_container_instance"
-  description = "The type of Azure compute to use for self-hosted agents. Must be either 'azure_container_app' or 'azure_container_instance'."
+  description = "The type of Azure compute to use for self-hosted agents. Must be either 'azure_container_app', 'azure_container_instance', or 'azure_devops_managed_pool'."
 
   validation {
-    condition     = contains(["azure_container_app", "azure_container_instance"], var.agent_compute_type)
-    error_message = "agent_compute_type must be either 'azure_container_app' or 'azure_container_instance'."
+    condition     = contains(["azure_container_app", "azure_container_instance", "azure_devops_managed_pool"], var.agent_compute_type)
+    error_message = "agent_compute_type must be either 'azure_container_app', 'azure_container_instance', or 'azure_devops_managed_pool'."
   }
 }
 
@@ -29,7 +29,7 @@ variable "agent_compute_use_availability_zones" {
 variable "agent_container_instance_count" {
   type        = number
   default     = 4
-  description = "The number of container instances to provision when `agent_compute_type` is 'azure_container_instance'. Ignored when `agent_compute_type` is 'azure_container_app'."
+  description = "The number of container instances to provision when `agent_compute_type` is 'azure_container_instance'. Ignored when `agent_compute_type` is 'azure_container_app' or 'azure_devops_managed_pool'."
 
   validation {
     condition     = var.agent_container_instance_count >= 1
@@ -65,6 +65,12 @@ variable "azure_existing_agents_subnet_resource_id" {
   type        = string
   default     = null
   description = "The resource ID of a pre-existing subnet for agents (BYO mode). The subnet must have the appropriate delegation for the chosen `agent_compute_type`."
+}
+
+variable "azure_existing_dev_center_project_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing Azure Dev Center project (BYO mode). When set, the module will not create a Dev Center project."
 }
 
 variable "azure_existing_private_endpoints_subnet_resource_id" {

@@ -31,7 +31,7 @@ resource "azuredevops_securityrole_assignment" "agents_uami_pool_admin" {
   count = local.create_agent_infrastructure && var.agent_authentication_method == "uami" ? 1 : 0
 
   scope       = "distributedtask.agentpoolrole"
-  resource_id = azuredevops_agent_pool.this[0].id
+  resource_id = local.effective_agent_pool_id
   role_name   = "Administrator"
   identity_id = azuredevops_service_principal_entitlement.agents_user_assigned_managed_identity[0].id
 }

@@ -16,6 +16,24 @@ data "azapi_resource_action" "subscription" {
   response_export_values = ["displayName"]
 }
 
+data "msgraph_resource" "devops_infra" {
+  url = "servicePrincipals"
+  query_parameters = {
+    "$filter" = ["displayName eq 'DevOpsInfrastructure'"]
+    "$select" = ["id"]
+  }
+  response_export_values = {
+    object_ids = "value[].id"
+  }
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.output.object_ids) == 1
+      error_message = "Expected exactly one Microsoft Entra service principal named DevOpsInfrastructure in the configured tenant."
+    }
+  }
+}
+
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.13.0"

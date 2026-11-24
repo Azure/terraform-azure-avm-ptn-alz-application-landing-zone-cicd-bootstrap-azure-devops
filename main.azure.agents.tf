@@ -1,7 +1,7 @@
 module "azure_devops_agents" {
   source  = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
   version = "0.6.0"
-  count   = local.create_agent_infrastructure ? 1 : 0
+  count   = local.create_agent_container_instance_infrastructure ? 1 : 0
 
   location                                        = var.location
   postfix                                         = local.resource_names.agent_compute_postfix_name
@@ -29,4 +29,34 @@ module "azure_devops_agents" {
   depends_on = [
     azuredevops_securityrole_assignment.agents_uami_pool_admin,
   ]
+}
+
+module "azure_managed_devops_pool" {
+  source  = "Azure/avm-res-devopsinfrastructure-pool/azurerm"
+  version = "0.3.2"
+  count   = local.create_agent_managed_pool_infrastructure ? 1 : 0
+
+  dev_center_project_resource_id = local.effective_dev_center_project_id
+  location                       = var.location
+  name                           = local.resource_names.devops_agent_pool_name
+  resource_group_name            = module.resource_group["agents"].name
+  managed_identities = {
+    system_assigned            = false
+    user_assigned_resource_ids = var.agent_authentication_method == "uami" ? [module.agents_user_assigned_managed_identity[0].resource_id] : []
+  }
+  maximum_concurrency = var.agent_container_instance_count
+  organization_profile = {
+    kind = "AzureDevOps"
+    organizations = [
+      {
+        name = data.azuredevops_client_config.current.name
+        projects = [
+          local.azure_devops_project_name
+        ]
+      }
+    ]
+  }
+  subnet_id = local.effective_agents_subnet_id
+
+  depends_on = [module.virtual_network]
 }
