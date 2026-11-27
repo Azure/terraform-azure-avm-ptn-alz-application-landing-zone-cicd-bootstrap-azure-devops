@@ -1,6 +1,6 @@
 module "ip_addresses" {
   source  = "Azure/avm-utl-network-ip-addresses/azurerm"
-  version = "0.1.1"
+  version = "0.3.0"
   count   = local.create_vnet_infrastructure ? 1 : 0
 
   address_prefixes = var.azure_subnets_and_sizes
@@ -22,7 +22,7 @@ locals {
 
 module "virtual_network" {
   source  = "Azure/avm-res-network-virtualnetwork/azurerm"
-  version = "0.17.1"
+  version = "0.23.0"
   count   = local.create_vnet_infrastructure ? 1 : 0
 
   location      = var.location
